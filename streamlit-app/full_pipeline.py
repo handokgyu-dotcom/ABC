@@ -376,6 +376,7 @@ def process_full_pipeline(pdf_path, client, hammer_rate=DEFAULT_HAMMER_RATE, rat
             "hogangnono_price": hogangnono_price,
             "molit_price": molit_price,
             "molit_trade_count": molit_result.get("trade_count") if molit_result else 0,
+            "molit_trades": molit_result.get("matches") if molit_result else [],
             "hammer_rate": applied_rate,
             "matched_rate_region": matched_region,
             "collateral_value": collateral_value,

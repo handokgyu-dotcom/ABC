@@ -139,6 +139,8 @@ td.bad{color:var(--crit-ink);font-weight:600}
 .std{font-family:"IBM Plex Mono",monospace;font-size:10.5px;color:var(--crit-ink)}
 table.mini td,table.mini th{padding:5px 7px}
 table input,table select{padding:5px 7px;font-size:12.5px}
+.trade-detail{padding:10px 9px 16px;background:var(--surface-2)}
+.trade-detail .sub-h{margin:0 0 6px}
 
 /* ── 결과 ── */
 .total{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:1px;background:var(--line);
@@ -827,6 +829,45 @@ if($('f_collateral_pdf'))$('f_collateral_pdf').addEventListener('change',e=>{
   $('f_collateral_pdf_got').textContent=f?(f.name+' · '+Math.round(f.size/1024)+' KB'):'';
 });
 
+function fmtTradeDate(y,m,d){
+  if(y&&m&&d)return y+'.'+String(m).padStart(2,'0')+'.'+String(d).padStart(2,'0');
+  return '—';
+}
+
+function hgnnTradeRows(trades){
+  return (trades||[]).slice(0,5).map(t=>{
+    const dm=String(t.date||'').match(/^(\d{4})-(\d{2})-(\d{2})/);
+    return '<tr>'+
+      '<td>'+(dm?fmtTradeDate(dm[1],dm[2],dm[3]):'—')+'</td>'+
+      '<td class="n">'+(t.floor!=null?t.floor+'층':'—')+'</td>'+
+      '<td class="n">'+(t.price!=null?W(Math.round(t.price*10000)):'—')+'</td>'+
+      '</tr>';
+  }).join('');
+}
+
+function molitTradeRows(trades){
+  return (trades||[]).slice(0,5).map(t=>{
+    const amt=parseInt(String(t.dealAmount||'').replace(/,/g,''),10);
+    return '<tr>'+
+      '<td>'+fmtTradeDate(t.dealYear,t.dealMonth,t.dealDay)+'</td>'+
+      '<td class="n">'+(t.floor!=null?t.floor+'층':'—')+'</td>'+
+      '<td class="n">'+(t.excluUseAr?Number(t.excluUseAr).toFixed(1)+'㎡':'—')+'</td>'+
+      '<td class="n">'+(!isNaN(amt)?W(amt*10000):'—')+'</td>'+
+      '</tr>';
+  }).join('');
+}
+
+function renderTradeDetail(p){
+  const hgnnRows=hgnnTradeRows(p.recent_trades);
+  const molitRows=molitTradeRows(p.molit_trades);
+  return '<div class="trade-detail">'+
+    '<div class="sub-h"><span class="tag">호갱노노 최근 실거래</span>'+(p.hogangnono_price!=null?'평균 '+W(p.hogangnono_price):'거래 없음')+'</div>'+
+    (hgnnRows?'<table class="mini"><thead><tr><th>거래일</th><th class="n">층</th><th class="n">금액</th></tr></thead><tbody>'+hgnnRows+'</tbody></table>':'<div class="muted">최근 거래 내역 없음</div>')+
+    '<div class="sub-h" style="margin-top:12px"><span class="tag">국토부 실거래가 (최근 3개월)</span>'+(p.molit_price!=null?'평균 '+W(p.molit_price)+' · '+(p.molit_trade_count||0)+'건':'거래 없음')+'</div>'+
+    (molitRows?'<table class="mini"><thead><tr><th>거래일</th><th class="n">층</th><th class="n">전용면적</th><th class="n">금액</th></tr></thead><tbody>'+molitRows+'</tbody></table>':'<div class="muted">최근 거래 내역 없음</div>')+
+    '</div>';
+}
+
 function renderCollateralResult(data){
   const tbody=$('collateral_tbl').querySelector('tbody');
   tbody.innerHTML='';
@@ -840,6 +881,13 @@ function renderCollateralResult(data){
       '<td class="n">'+rateTxt+'</td>'+
       '<td class="n">'+(p.collateral_value!=null?W(p.collateral_value):'—')+'</td>';
     tbody.appendChild(tr);
+
+    const dtr=document.createElement('tr');
+    const dtd=document.createElement('td');
+    dtd.colSpan=5;
+    dtd.innerHTML=renderTradeDetail(p);
+    dtr.appendChild(dtd);
+    tbody.appendChild(dtr);
   });
   $('o_collateral_total').textContent=data.grand_total_collateral!=null?W(data.grand_total_collateral):'—';
 }
