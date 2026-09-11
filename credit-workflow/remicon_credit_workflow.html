@@ -203,6 +203,7 @@ footer.foot{max-width:1060px;margin:26px auto 0;color:var(--ink-3);font-size:11.
   <button type="button" role="tab" id="t2" aria-selected="false" data-go="p2"><span class="num">STEP 02</span><span class="nm">등급 · 거래조건</span></button>
   <button type="button" role="tab" id="t3" aria-selected="false" data-go="p3"><span class="num">STEP 03</span><span class="nm">담보 평가</span></button>
   <button type="button" role="tab" id="t4" aria-selected="false" data-go="p4"><span class="num">STEP 04</span><span class="nm">심사 결과</span></button>
+  <button type="button" role="tab" id="t5" aria-selected="false" data-go="p5"><span class="num">STEP 05</span><span class="nm">담보가치 평가</span></button>
 </div>
 
 <main>
@@ -406,11 +407,51 @@ footer.foot{max-width:1060px;margin:26px auto 0;color:var(--ink-3);font-size:11.
   <div id="s_flags"></div>
   <div class="row-actions"><button type="button" class="act ghost" id="btn_reset">입력 초기화</button></div>
 </section>
+
+<!-- ══════════ STEP 5 ══════════ -->
+<section class="panel" id="p5">
+  <h2><span class="stepno">05</span>담보가치 평가 (등기부 자동 분석)</h2>
+  <p class="hint">등기부등본 PDF를 업로드하면 별도 백엔드(streamlit-app API)가 물건지를 자동 감지하고,
+    선순위(근저당권) 합계 · 최근 실거래가 · 담보가치를 계산해 돌려줍니다. 이 화면은 결과를 표시만 하며,
+    분석 로직은 <span class="mono">streamlit-app/</span> 폴더의 API 서버에서 수행됩니다.</p>
+
+  <div class="filebox" style="max-width:420px;margin-bottom:18px">
+    <span class="t">부동산 등기부등본 (PDF)</span>
+    <input type="file" id="f_collateral_pdf" accept=".pdf">
+    <span class="got" id="f_collateral_pdf_got"></span>
+  </div>
+
+  <div class="ocr">
+    <div class="sub-h"><span class="tag">담보가치 자동 평가</span>등기부 업로드 후 실행 · 결과는 아래 표에 표시<span class="st" id="st_collateral"></span></div>
+    <div class="grid">
+      <label class="f"><span>Gemini API 키 <em>· 등기부 인식에 사용 · 저장되지 않음</em></span>
+        <input type="password" id="i_gemini_key" placeholder="API 키 입력" autocomplete="off"></label>
+      <label class="f"><span>기본 낙찰가율 (%) <em>· 기준표에 없는 지역일 때 사용</em></span>
+        <input type="number" id="i_collateral_rate" class="num" min="1" max="100" value="80"></label>
+      <label class="f"><span>낙찰가율 기준표 (선택) <em>· csv/xlsx</em></span>
+        <input type="file" id="f_collateral_ratetable" accept=".csv,.xlsx,.xls"></label>
+    </div>
+    <div class="row-actions">
+      <button type="button" class="act" id="btn_collateral_eval">담보가치 평가 실행</button>
+      <button type="button" class="act ghost" id="btn_collateral_report" disabled>PDF 리포트 다운로드</button>
+    </div>
+  </div>
+
+  <div class="tw" style="margin-top:18px">
+    <table id="collateral_tbl"><thead><tr>
+      <th>물건지</th><th class="n">선순위</th><th class="n">실거래가</th><th class="n">낙찰가율</th><th class="n">담보가치</th>
+    </tr></thead><tbody></tbody></table>
+  </div>
+  <div class="total" style="margin-top:16px">
+    <div class="hi"><div class="k">전체 물건지 담보가치 합계</div><div class="v" id="o_collateral_total">—</div></div>
+  </div>
+  <div id="collateral_flag"></div>
+</section>
 </main>
 
 <footer class="foot">
   <span>사내 등급화 26.07 · 재무 25년말 · 낙찰률 23.05 배포분 · 물건종류 26.09.11 확정</span>
-  <span class="mono">외부 API는 이 화면에서 직접 호출하지 않습니다</span>
+  <span class="mono">STEP 05 담보가치 평가만 별도 백엔드(streamlit-app API)를 호출하며, 그 외 화면은 외부 API를 직접 호출하지 않습니다</span>
 </footer>
 </div>
 
@@ -779,6 +820,91 @@ function resetAll(){
 }
 $('btn_reset').addEventListener('click',resetAll);
 if($('btn_reset2'))$('btn_reset2').addEventListener('click',resetAll);
+
+/* ── STEP 5 : 담보가치 자동 평가 (streamlit-app FastAPI 백엔드 호출) ── */
+/* 개발 기본값. streamlit-app/api_server.py 를 로컬에서 uvicorn으로 띄운 주소. */
+const API_BASE='http://localhost:8000';
+let COLLATERAL_RESULT=null;
+
+if($('f_collateral_pdf'))$('f_collateral_pdf').addEventListener('change',e=>{
+  const f=e.target.files&&e.target.files[0];
+  $('f_collateral_pdf_got').textContent=f?(f.name+' · '+Math.round(f.size/1024)+' KB'):'';
+});
+
+function renderCollateralResult(data){
+  const tbody=$('collateral_tbl').querySelector('tbody');
+  tbody.innerHTML='';
+  (data.properties||[]).forEach(p=>{
+    const tr=document.createElement('tr');
+    const rateTxt=p.hammer_rate!=null?Math.round(p.hammer_rate*100)+'%'+(p.matched_rate_region?' · '+p.matched_rate_region:''):'—';
+    tr.innerHTML=
+      '<td>'+(p.address||'주소 미상')+(p.error?'<div class="muted">'+p.error+'</div>':'')+'</td>'+
+      '<td class="n">'+(p.total_priority_amount!=null?W(p.total_priority_amount):'—')+'</td>'+
+      '<td class="n">'+(p.market_price!=null?W(p.market_price):'—')+'</td>'+
+      '<td class="n">'+rateTxt+'</td>'+
+      '<td class="n">'+(p.collateral_value!=null?W(p.collateral_value):'—')+'</td>';
+    tbody.appendChild(tr);
+  });
+  $('o_collateral_total').textContent=data.grand_total_collateral!=null?W(data.grand_total_collateral):'—';
+}
+
+async function evaluateCollateral(){
+  const f=$('f_collateral_pdf').files&&$('f_collateral_pdf').files[0];
+  if(!f){setSt('st_collateral','off','PDF를 업로드하십시오');return}
+  const key=($('i_gemini_key').value||'').trim();
+  if(!key){setSt('st_collateral','off','Gemini API 키를 입력하십시오');return}
+
+  setSt('st_collateral','run','평가 중… (물건지 감지 · 실거래가 조회)');
+  $('btn_collateral_report').disabled=true;
+  $('collateral_flag').innerHTML='';
+
+  const fd=new FormData();
+  fd.append('pdf',f);
+  fd.append('gemini_api_key',key);
+  fd.append('hammer_rate',(Number($('i_collateral_rate').value)||80)/100);
+  const rt=$('f_collateral_ratetable').files&&$('f_collateral_ratetable').files[0];
+  if(rt)fd.append('rate_table',rt);
+
+  try{
+    const res=await fetch(API_BASE+'/api/collateral/evaluate',{method:'POST',body:fd});
+    if(!res.ok)throw new Error(await res.text());
+    const data=await res.json();
+    COLLATERAL_RESULT=data;
+    renderCollateralResult(data);
+    setSt('st_collateral','on','평가 완료 · 물건지 '+(data.properties||[]).length+'개');
+    $('btn_collateral_report').disabled=false;
+    markDone(4,true);
+  }catch(err){
+    setSt('st_collateral','off','평가 실패');
+    $('collateral_flag').innerHTML='<div class="warnbox"><b>담보가치 평가 실패.</b> '+
+      (err&&err.message?err.message:'백엔드 API('+API_BASE+') 연결을 확인하십시오')+'</div>';
+    markDone(4,false);
+  }
+}
+
+async function downloadCollateralReport(){
+  if(!COLLATERAL_RESULT)return;
+  try{
+    const res=await fetch(API_BASE+'/api/collateral/report',{
+      method:'POST',
+      headers:{'Content-Type':'application/json'},
+      body:JSON.stringify(COLLATERAL_RESULT)
+    });
+    if(!res.ok)throw new Error(await res.text());
+    const blob=await res.blob();
+    const url=URL.createObjectURL(blob);
+    const a=document.createElement('a');
+    a.href=url; a.download='담보가치_리포트.pdf';
+    document.body.appendChild(a); a.click(); a.remove();
+    URL.revokeObjectURL(url);
+  }catch(err){
+    $('collateral_flag').innerHTML='<div class="warnbox"><b>리포트 생성 실패.</b> '+
+      (err&&err.message?err.message:'')+'</div>';
+  }
+}
+
+if($('btn_collateral_eval'))$('btn_collateral_eval').addEventListener('click',evaluateCollateral);
+if($('btn_collateral_report'))$('btn_collateral_report').addEventListener('click',downloadCollateralReport);
 
 if(!load())seed();
 $('i_deungi_type').value='건물: 아파트'; if(!$('i_type').value)$('i_type').value='아파트';

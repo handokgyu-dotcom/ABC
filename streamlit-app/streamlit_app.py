@@ -2,6 +2,12 @@
 """
 등기부등본 -> 담보가치 자동 계산 - Streamlit 웹 UI
 물건지 자동 감지 + 선순위 계산 + 실거래가 조회 + 담보가치 산출
+
+⚠️ DEPRECATED: 이 Streamlit UI는 FastAPI 백엔드(api_server.py) +
+credit-workflow/remicon_credit_workflow.html 프론트엔드로 대체될 예정입니다.
+신규 기능/버그 수정은 이 파일이 아니라 api_server.py + HTML 쪽에 반영하세요.
+(다른 모듈 registry_core.py / full_pipeline.py / hogangnono_lookup.py /
+rtms_lookup.py / pdf_report.py 는 계속 재사용되므로 이 파일과 무관하게 유지보수됩니다.)
 """
 import streamlit as st
 import os
@@ -140,7 +146,7 @@ if extract_button:
             if mode == "자동 감지 (물건지 여러 개 가능)":
                 with st.spinner("등기부등본 분석 + 실거래가 조회 + 담보가치 계산 중..."):
                     result = pipeline.process_full_pipeline(
-                        pdf_bytes, hammer_rate=default_rate, rate_table=rate_table, log=ui_log
+                        pdf_bytes, client, hammer_rate=default_rate, rate_table=rate_table, log=ui_log
                     )
             else:
                 # 수동 지정 모드: 을구 페이지만 직접 지정, 나머지는 자동

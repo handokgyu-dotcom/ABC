@@ -10,14 +10,6 @@ import json
 import requests
 from datetime import datetime, timedelta
 
-# Windows 콘솔 한글 출력 깨짐 방지 (이미 설정되어 있으면 건너뜀)
-if sys.platform == "win32" and hasattr(sys.stdout, "reconfigure"):
-    try:
-        sys.stdout.reconfigure(encoding="utf-8")
-        sys.stderr.reconfigure(encoding="utf-8")
-    except Exception:
-        pass
-
 BASE_URL = "https://hogangnono.com"
 
 HEADERS = {
@@ -316,6 +308,16 @@ def lookup_recent_price(address_or_apt_name, months=3, trade_type=0, target_area
 if __name__ == "__main__":
     import sys
     import json
+
+    # 콘솔 직접 실행(CLI) 시에만 Windows 한글 출력 깨짐 방지 적용.
+    # (api_server.py/streamlit_app.py에서 import될 때는 서버 프로세스의
+    #  stdio를 건드리지 않도록 이 reconfigure를 모듈 최상단에 두지 않는다.)
+    if sys.platform == "win32" and hasattr(sys.stdout, "reconfigure"):
+        try:
+            sys.stdout.reconfigure(encoding="utf-8")
+            sys.stderr.reconfigure(encoding="utf-8")
+        except Exception:
+            pass
 
     if len(sys.argv) < 2:
         print("사용법: python hogangnono_lookup.py <검색어>")
