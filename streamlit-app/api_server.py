@@ -17,6 +17,13 @@ streamlit_app.py(Streamlit UI, DEPRECATED)가 하던 일을 REST API로 노출�
 import io
 import os
 
+from dotenv import load_dotenv
+
+# .env는 이 파일과 같은 폴더(streamlit-app/)에 있다고 가정한다.
+# 프로세스가 어느 위치에서/어떻게 기동되든(uvicorn, streamlit 등) 항상 로드되도록
+# 파일 경로를 명시한다 (cwd에 의존하지 않음).
+load_dotenv(os.path.join(os.path.dirname(__file__), ".env"))
+
 from fastapi import FastAPI, File, Form, HTTPException, UploadFile
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import StreamingResponse
@@ -38,42 +45,64 @@ app.add_middleware(
 )
 
 
-def _load_rate_table_smart(file_bytes, filename_hint=""):
+# 낙찰가율 기준표: streamlit-app/ 폴더에 미리 넣어둔 고정 파일을 항상 사용한다.
+# (streamlit_app.py의 "저장된 기준표 사용 (자동)" 모드와 동일한 파일 · 동일한 방식)
+# 프론트엔드(credit-workflow HTML)는 매 요청마다 표를 업로드하지 않는다.
+DEFAULT_RATE_TABLE_PATH = os.path.join(os.path.dirname(__file__), "낙찰가율_기준표.xlsx")
+
+_default_rate_table_cache = None
+
+
+def _load_rate_table_smart(file_bytes_or_path, filename_hint=""):
     """법원 관할구역별 형식 우선 시도, 실패하면 단순 2열 형식으로 재시도."""
     try:
-        return pipeline.load_court_rate_table(file_bytes, filename_hint=filename_hint, property_type="아파트")
+        return pipeline.load_court_rate_table(file_bytes_or_path, filename_hint=filename_hint, property_type="아파트")
     except Exception:
-        return pipeline.load_rate_table(file_bytes, filename_hint=filename_hint)
+        return pipeline.load_rate_table(file_bytes_or_path, filename_hint=filename_hint)
+
+
+def _load_default_rate_table():
+    """서버에 저장된 낙찰가율_기준표.xlsx를 최초 요청 시 1회만 로드해 캐시한다."""
+    global _default_rate_table_cache
+    if _default_rate_table_cache is None:
+        if not os.path.exists(DEFAULT_RATE_TABLE_PATH):
+            raise HTTPException(
+                500,
+                f"서버에 낙찰가율 기준표({os.path.basename(DEFAULT_RATE_TABLE_PATH)})가 없습니다. "
+                f"streamlit-app/ 폴더에 파일을 넣어주세요.",
+            )
+        _default_rate_table_cache = _load_rate_table_smart(
+            DEFAULT_RATE_TABLE_PATH, filename_hint=DEFAULT_RATE_TABLE_PATH
+        )
+    return _default_rate_table_cache
 
 
 @app.post("/api/collateral/evaluate")
 async def evaluate_collateral(
     pdf: UploadFile = File(...),
-    gemini_api_key: str = Form(...),
+    gemini_api_key: str | None = Form(None),
     hammer_rate: float = Form(pipeline.DEFAULT_HAMMER_RATE),
-    rate_table: UploadFile | None = File(None),
 ):
     """
     등기부등본 PDF -> 물건지 자동 감지 + 선순위 계산 + 실거래가 조회 + 담보가치 산출.
 
     streamlit_app.py의 "자동 감지" 모드와 동일한 파이프라인
     (full_pipeline.process_full_pipeline)을 그대로 재사용한다.
+
+    gemini_api_key는 선택값이다. 프론트엔드(credit-workflow HTML)는 키를 직접
+    다루지 않으며, 값이 없으면 서버 쪽 환경변수 GEMINI_API_KEY(.env)를 사용한다.
+    낙찰가율 기준표도 마찬가지로 매 요청 업로드받지 않고, 서버에 저장된
+    낙찰가율_기준표.xlsx를 항상 사용한다.
     """
+    gemini_api_key = gemini_api_key or os.environ.get("GEMINI_API_KEY")
     if not gemini_api_key:
-        raise HTTPException(400, "gemini_api_key가 필요합니다")
+        raise HTTPException(500, "서버에 GEMINI_API_KEY가 설정되어 있지 않습니다 (.env 확인 필요)")
 
     pdf_bytes = await pdf.read()
     if not pdf_bytes:
         raise HTTPException(400, "PDF 파일이 비어 있습니다")
 
-    rate_table_data = None
-    if rate_table is not None:
-        rt_bytes = await rate_table.read()
-        if rt_bytes:
-            try:
-                rate_table_data = _load_rate_table_smart(rt_bytes, filename_hint=rate_table.filename or "")
-            except Exception as e:
-                raise HTTPException(400, f"낙찰가율 기준표 파싱 실패: {e}")
+    rate_table_data = _load_default_rate_table()
 
     logs = []
 

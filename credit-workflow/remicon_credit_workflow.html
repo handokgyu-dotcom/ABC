@@ -424,12 +424,8 @@ footer.foot{max-width:1060px;margin:26px auto 0;color:var(--ink-3);font-size:11.
   <div class="ocr">
     <div class="sub-h"><span class="tag">담보가치 자동 평가</span>등기부 업로드 후 실행 · 결과는 아래 표에 표시<span class="st" id="st_collateral"></span></div>
     <div class="grid">
-      <label class="f"><span>Gemini API 키 <em>· 등기부 인식에 사용 · 저장되지 않음</em></span>
-        <input type="password" id="i_gemini_key" placeholder="API 키 입력" autocomplete="off"></label>
       <label class="f"><span>기본 낙찰가율 (%) <em>· 기준표에 없는 지역일 때 사용</em></span>
         <input type="number" id="i_collateral_rate" class="num" min="1" max="100" value="80"></label>
-      <label class="f"><span>낙찰가율 기준표 (선택) <em>· csv/xlsx</em></span>
-        <input type="file" id="f_collateral_ratetable" accept=".csv,.xlsx,.xls"></label>
     </div>
     <div class="row-actions">
       <button type="button" class="act" id="btn_collateral_eval">담보가치 평가 실행</button>
@@ -851,8 +847,6 @@ function renderCollateralResult(data){
 async function evaluateCollateral(){
   const f=$('f_collateral_pdf').files&&$('f_collateral_pdf').files[0];
   if(!f){setSt('st_collateral','off','PDF를 업로드하십시오');return}
-  const key=($('i_gemini_key').value||'').trim();
-  if(!key){setSt('st_collateral','off','Gemini API 키를 입력하십시오');return}
 
   setSt('st_collateral','run','평가 중… (물건지 감지 · 실거래가 조회)');
   $('btn_collateral_report').disabled=true;
@@ -860,10 +854,7 @@ async function evaluateCollateral(){
 
   const fd=new FormData();
   fd.append('pdf',f);
-  fd.append('gemini_api_key',key);
   fd.append('hammer_rate',(Number($('i_collateral_rate').value)||80)/100);
-  const rt=$('f_collateral_ratetable').files&&$('f_collateral_ratetable').files[0];
-  if(rt)fd.append('rate_table',rt);
 
   try{
     const res=await fetch(API_BASE+'/api/collateral/evaluate',{method:'POST',body:fd});

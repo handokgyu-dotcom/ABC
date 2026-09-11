@@ -1,0 +1,23 @@
+{
+  "version": "0.0.1",
+  "configurations": [
+    {
+      "name": "streamlit-app",
+      "runtimeExecutable": "streamlit",
+      "runtimeArgs": ["run", "streamlit-app/streamlit_app.py", "--server.port", "8501", "--server.headless", "true"],
+      "port": 8501
+    },
+    {
+      "name": "collateral-api",
+      "runtimeExecutable": "cmd",
+      "runtimeArgs": ["/c", "cd streamlit-app && uvicorn api_server:app --port 8000"],
+      "port": 8000
+    },
+    {
+      "name": "credit-workflow-static",
+      "runtimeExecutable": "cmd",
+      "runtimeArgs": ["/c", "cd credit-workflow && python -m http.server 8080"],
+      "port": 8080
+    }
+  ]
+}
