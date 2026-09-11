@@ -12,25 +12,16 @@ import os
 import json
 import time
 from pathlib import Path
-from google import genai
 
 import registry_core as core
 import hogangnono_lookup as hgnn
 import rtms_lookup as rtms
 
-if sys.platform == "win32" and hasattr(sys.stdout, "reconfigure"):
-    try:
-        sys.stdout.reconfigure(encoding="utf-8")
-        sys.stderr.reconfigure(encoding="utf-8")
-    except Exception:
-        pass
-
-API_KEY = os.environ.get("GEMINI_API_KEY")
-if not API_KEY:
-    print("[오류] 환경변수 GEMINI_API_KEY가 설정되지 않았습니다")
-    sys.exit(1)
-
-client = genai.Client(api_key=API_KEY)
+# 참고: 이 모듈은 CLI(`python full_pipeline.py ...`)와 API 서버(api_server.py) 양쪽에서
+# import 되므로, import 시점에 프로세스를 종료시키거나(sys.exit) 전역 API 클라이언트를
+# 만드는 부수효과를 두지 않는다. genai.Client는 호출자(streamlit_app.py / api_server.py)가
+# 각자의 API 키로 매 요청마다 생성해 process_full_pipeline() 내부의 core.process_all_properties()에
+# 전달하지 않고, 아래처럼 이 모듈이 직접 필요로 하는 곳(없음)에서만 사용한다.
 
 # 기본 낙찰가율 (기준표에 매칭되는 지역이 없을 때 사용)
 DEFAULT_HAMMER_RATE = 0.80
@@ -232,9 +223,13 @@ def match_hammer_rate(address, rate_table, default_rate=DEFAULT_HAMMER_RATE):
     return best_rate, "+".join(best_keywords)
 
 
-def process_full_pipeline(pdf_path, hammer_rate=DEFAULT_HAMMER_RATE, rate_table=None, log=print):
+def process_full_pipeline(pdf_path, client, hammer_rate=DEFAULT_HAMMER_RATE, rate_table=None, log=print):
     """
     등기부등본 -> 담보가치까지 전체 처리
+
+    Args:
+        client: google.genai.Client 인스턴스. 호출자가 요청 시점의 API 키로 생성해 전달한다
+                (이 모듈은 더 이상 자체 client를 만들지 않는다).
 
     Returns:
         {
@@ -417,11 +412,27 @@ def print_final_report(result):
 
 
 if __name__ == "__main__":
+    from google import genai
+
+    # 콘솔 직접 실행(CLI) 시에만 Windows 한글 출력 깨짐 방지 적용.
+    if sys.platform == "win32" and hasattr(sys.stdout, "reconfigure"):
+        try:
+            sys.stdout.reconfigure(encoding="utf-8")
+            sys.stderr.reconfigure(encoding="utf-8")
+        except Exception:
+            pass
+
     if len(sys.argv) < 2:
         print("사용법: python full_pipeline.py <PDF파일경로> [낙찰가율(0.0~1.0)] [낙찰가율기준표.xlsx]")
         print("예: python full_pipeline.py 등기부등본.pdf 0.8")
         print("예: python full_pipeline.py 등기부등본.pdf 0.8 낙찰가율표.xlsx")
         sys.exit(1)
+
+    _api_key = os.environ.get("GEMINI_API_KEY")
+    if not _api_key:
+        print("[오류] 환경변수 GEMINI_API_KEY가 설정되지 않았습니다")
+        sys.exit(1)
+    cli_client = genai.Client(api_key=_api_key)
 
     pdf_file = sys.argv[1]
     rate = float(sys.argv[2]) if len(sys.argv) > 2 else DEFAULT_HAMMER_RATE
@@ -438,7 +449,7 @@ if __name__ == "__main__":
 
     start = time.time()
     try:
-        result = process_full_pipeline(pdf_file, hammer_rate=rate, rate_table=rate_table)
+        result = process_full_pipeline(pdf_file, cli_client, hammer_rate=rate, rate_table=rate_table)
         print_final_report(result)
 
         output_file = Path(pdf_file).stem + "_collateral_result.json"

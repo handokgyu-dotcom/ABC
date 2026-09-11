@@ -1,0 +1,16 @@
+# streamlit-app/ 의존성
+# 기존 Streamlit UI (DEPRECATED) + 새 FastAPI 백엔드(api_server.py) 공용
+
+streamlit
+google-genai
+pymupdf
+Pillow
+pandas
+openpyxl
+requests
+reportlab
+
+# FastAPI 백엔드
+fastapi
+uvicorn[standard]
+python-multipart
