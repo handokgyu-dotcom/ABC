@@ -222,22 +222,22 @@ footer.foot{max-width:1060px;margin:26px auto 0;color:var(--ink-3);font-size:11.
     <div class="sub-h"><span class="tag">주문서 자동 인식</span>업로드 시 자동 입력 · 확인 후 수정 가능<span class="st" id="st_order"></span></div>
     <div class="grid">
       <label class="f"><span>1 · 거래선코드 <em>· 좌측 상단 10자리</em></span>
-        <input type="text" id="i_code" class="num" inputmode="numeric" maxlength="14" placeholder="1701190000" value="1701190000"></label>
+        <input type="text" id="i_code" class="num" inputmode="numeric" maxlength="14" placeholder="1701190000"></label>
       <label class="f"><span>2 · 결제조건 <em>· 결제조건란</em></span>
-        <input type="text" id="i_pay" placeholder="예) 35일 현금" value="35일 현금"></label>
+        <input type="text" id="i_pay" placeholder="예) 35일 현금"></label>
       <label class="f"><span>3 · 현장명 <em>· 우측 상단 공사내역</em></span>
-        <input type="text" id="i_site" value="전현장"></label>
+        <input type="text" id="i_site" placeholder="현장명 입력"></label>
       <label class="f"><span>4 · 주문자 상호 <em>· 주문자란 · 등급표 검색 키</em></span>
-        <input type="text" id="i_name" list="dl_comp" placeholder="상호 일부만 입력" value="초당산업">
+        <input type="text" id="i_name" list="dl_comp" placeholder="상호 일부만 입력">
         <datalist id="dl_comp"></datalist></label>
       <label class="f"><span>4 · 주문자 대표자 <em>· 주문자란</em></span>
-        <input type="text" id="i_ceo" value="김지훈"></label>
+        <input type="text" id="i_ceo" placeholder="대표자명"></label>
     </div>
       <div class="sub-h" style="margin-top:20px"><span class="tag">연대보증인</span>주문서 연대보증인란 2개 · 기재가 있으면 추출, 없으면 형식만 남고 공란 · 한글 금액은 숫자로 변환<span class="st" id="st_gr"></span></div>
       <div class="grid">
-        <label class="f"><span>① 성명 <em>· 연대보증인란</em></span><input type="text" id="i_gr" value="김지훈"></label>
-        <label class="f"><span>① 주문자와의 관계</span><input type="text" id="i_grrel" value="대표"></label>
-        <label class="f"><span>① 보증최고액 <em>· 원</em></span><input type="text" id="i_grmax" class="num" value="100,000,000"></label>
+        <label class="f"><span>① 성명 <em>· 연대보증인란</em></span><input type="text" id="i_gr" placeholder="기재 없음"></label>
+        <label class="f"><span>① 주문자와의 관계</span><input type="text" id="i_grrel" placeholder="기재 없음"></label>
+        <label class="f"><span>① 보증최고액 <em>· 원</em></span><input type="text" id="i_grmax" class="num" placeholder="기재 없음"></label>
       </div>
       <div class="grid" style="margin-top:12px">
         <label class="f"><span>② 성명 <em>· 기재 시</em></span><input type="text" id="i_gr2" placeholder="기재 없음"></label>
@@ -517,9 +517,13 @@ const OCR={f_order:{got:'f_order_got',st:['st_order'],n:[4],label:['4개 항목'
   f_deungi:{got:'f_deungi_got',st:['st_deungi','st_eul'],n:[8,3],label:['8개 항목','을구 3행']},
   f_ins:{got:'f_ins_got',st:['st_ins'],n:[9],label:['9개 항목']}};
 function setSt(id,cls,txt){const e=$(id);if(!e)return;e.className='st '+cls;e.textContent=txt}
+/* 주문서 미업로드 시 빈 값(placeholder="기재 없음"/자체 안내문구)으로 되돌리는 항목들.
+   연대보증인 ①(i_gr/i_grrel/i_grmax)도 ②와 동일하게 "기재 없음"으로 취급한다. */
+const ORDER_FIELDS=['i_code','i_pay','i_site','i_name','i_ceo','i_gr','i_grrel','i_grmax'];
+function clearOrderFields(){ORDER_FIELDS.forEach(id=>{if($(id))$(id).value=''})}
 function grSt(uploaded){
   const n=[($('i_gr').value||'').trim(),($('i_gr2')?$('i_gr2').value:'').trim()].filter(Boolean).length;
-  if(!uploaded){setSt('st_gr','off',n?'예시값 · '+n+'명':'공란');return}
+  if(!uploaded){setSt('st_gr','off',n?'예시값 · '+n+'명':'기재 없음 · 공란');return}
   setSt('st_gr',n?'on':'off',n?'기재 '+n+'명 · 추출':'기재 없음 · 공란');
 }
 Object.keys(OCR).forEach(k=>{
@@ -529,7 +533,7 @@ Object.keys(OCR).forEach(k=>{
   $(k).addEventListener('change',e=>{
     const f=e.target.files&&e.target.files[0];
     $(c.got).textContent=f?(f.name+' · '+Math.round(f.size/1024)+' KB'):'';
-    if(!f){c.st.forEach(id=>setSt(id,'off','미업로드 · 예시값'));if(k==='f_order'){grSt(false);markDone(0,false)}save();return}
+    if(!f){c.st.forEach(id=>setSt(id,'off','미업로드 · 예시값'));if(k==='f_order'){clearOrderFields();grSt(false);markDone(0,false)}save();return}
     c.st.forEach(id=>setSt(id,'run','인식 중…'));
     setTimeout(()=>{c.st.forEach((id,i)=>setSt(id,'on','인식 완료 · '+c.label[i]));if(k==='f_order')grSt(true)},700);
     if(k==='f_order')markDone(0,true);
