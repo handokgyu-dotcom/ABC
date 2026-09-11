@@ -9,8 +9,10 @@ import requests
 import xml.etree.ElementTree as ET
 from datetime import datetime, timedelta, timezone
 
-# 아파트매매 실거래자료 API 엔드포인트 (data.go.kr "국토교통부_아파트 매매 실거래자료" 서비스)
-BASE_URL = "https://apis.data.go.kr/1613000/RTMSDataSvcAptTrade/getRTMSDataSvcAptTrade"
+# 아파트매매 실거래 상세자료 API 엔드포인트 (data.go.kr "국토교통부_아파트 매매 실거래가 상세자료" 서비스)
+# 기존 기본 API(RTMSDataSvcAptTrade)에는 없는 해제(취소) 여부 필드(cdealType)가 있어
+# 해제된 거래를 걸러낼 수 있다 (같은 서비스키로 호출 가능).
+BASE_URL = "https://apis.data.go.kr/1613000/RTMSDataSvcAptTradeDev/getRTMSDataSvcAptTradeDev"
 
 
 def _get_api_key():
@@ -76,6 +78,9 @@ def fetch_trade_data(lawd_cd, deal_ymd, api_key=None):
     items = []
     for item in root.findall(".//item"):
         data = {child.tag: (child.text or "").strip() for child in item}
+        # cdealType이 비어있지 않으면(보통 "O") 해제(취소)된 거래 -> 집계에서 제외
+        if data.get("cdealType"):
+            continue
         items.append(data)
 
     return items
@@ -111,8 +116,12 @@ def find_apartment_price(lawd_cd, apt_name, dong=None, area_sqm=None, area_toler
             item_apt_name = item.get("aptNm", "")
             if not (apt_name in item_apt_name or item_apt_name in apt_name):
                 continue
-            if dong and item.get("dong") and dong not in item.get("dong", ""):
-                continue
+            if dong:
+                # aptDong 표기가 "106", "106동" 등으로 들쭉날쭉하므로 숫자만 비교
+                item_dong_digits = "".join(ch for ch in item.get("aptDong", "") if ch.isdigit())
+                dong_digits = "".join(ch for ch in str(dong) if ch.isdigit())
+                if item_dong_digits and dong_digits and item_dong_digits != dong_digits:
+                    continue
             if area_sqm is not None:
                 try:
                     item_area = float(item.get("excluUseAr", ""))

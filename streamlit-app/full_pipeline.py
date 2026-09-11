@@ -9,6 +9,7 @@
 """
 import sys
 import os
+import re
 import json
 import time
 from pathlib import Path
@@ -16,6 +17,19 @@ from pathlib import Path
 import registry_core as core
 import hogangnono_lookup as hgnn
 import rtms_lookup as rtms
+
+
+def extract_building_dong(address):
+    """
+    등기부 주소에서 '동(棟)' 번호를 추출한다 (예: "...극동아파트 201동 802호" -> "201").
+
+    행정동(예: "청수동")은 숫자 없이 한글로만 끝나므로, 숫자 뒤에 바로 "동"이 붙는
+    패턴만 매칭하면 건물 동 번호만 정확히 골라낼 수 있다.
+    """
+    if not address:
+        return None
+    m = re.search(r"(\d+)\s*동(?:\s|$)", address)
+    return m.group(1) if m else None
 
 # 참고: 이 모듈은 CLI(`python full_pipeline.py ...`)와 API 서버(api_server.py) 양쪽에서
 # import 되므로, import 시점에 프로세스를 종료시키거나(sys.exit) 전역 API 클라이언트를
@@ -317,38 +331,41 @@ def process_full_pipeline(pdf_path, client, hammer_rate=DEFAULT_HAMMER_RATE, rat
             log(f"  [경고] {market_result['note']}")
         log(f"  [호갱노노] 최근 실거래가 (평균): {hogangnono_price:,}원" if hogangnono_price else "  [호갱노노] 실거래가 없음")
 
-        # 국토교통부 실거래가 공개시스템으로 교차검증
+        # 국토교통부 실거래가 공개시스템 (원천 데이터 · 주값)
         molit_price = None
         molit_result = None
         lawd_cd = matched_apt.get("lawd_cd")
+        building_dong = extract_building_dong(address)
         if lawd_cd:
             try:
                 molit_result = rtms.lookup_recent_price(
-                    lawd_cd, matched_apt.get("name", ""), area_sqm=area_sqm, months_back=3, log=log
+                    lawd_cd, matched_apt.get("name", ""), dong=building_dong,
+                    area_sqm=area_sqm, months_back=3, log=log
                 )
                 if molit_result.get("error"):
                     log(f"  [국토부] {molit_result['error']}")
                 else:
                     molit_price = molit_result.get("average_price")
-                    log(f"  [국토부] 최근 실거래가 (평균): {molit_price:,}원 ({molit_result.get('trade_count')}건)")
+                    log(f"  [국토부] 최근 실거래가 (평균): {molit_price:,}원 ({molit_result.get('trade_count')}건)"
+                        + (f" · {building_dong}동 필터 적용" if building_dong else ""))
             except Exception as e:
                 log(f"  [국토부] 조회 실패 (API 키 미설정 등): {e}")
         else:
-            log("  [국토부] 법정동코드를 알 수 없어 교차검증 생략")
+            log("  [국토부] 법정동코드를 알 수 없어 조회 생략")
 
-        # 두 소스 교차검증: 둘 다 있으면 평균, 하나만 있으면 그것 사용
-        if hogangnono_price and molit_price:
-            diff_pct = abs(hogangnono_price - molit_price) / max(hogangnono_price, molit_price) * 100
-            market_price = int((hogangnono_price + molit_price) / 2)
-            log(f"  [교차검증] 호갱노노 vs 국토부 차이: {diff_pct:.1f}%")
-            if diff_pct > 15:
-                log(f"  [경고] 두 소스 간 차이가 큽니다({diff_pct:.1f}%) — 수동 확인 권장")
-            log(f"  [최종 채택 시세] {market_price:,}원 (두 소스 평균)")
+        # 국토부 실거래가(법정 신고 원천 데이터)를 주값으로 우선 사용하고,
+        # 호갱노노는 참고/교차검증용으로만 쓴다. 국토부 조회가 안 될 때만 호갱노노로 대체.
+        if molit_price:
+            market_price = molit_price
+            if hogangnono_price:
+                diff_pct = abs(hogangnono_price - molit_price) / max(hogangnono_price, molit_price) * 100
+                log(f"  [교차검증] 국토부 vs 호갱노노 차이: {diff_pct:.1f}%")
+                if diff_pct > 15:
+                    log(f"  [경고] 두 소스 간 차이가 큽니다({diff_pct:.1f}%) — 수동 확인 권장")
+            log(f"  [최종 채택 시세] {market_price:,}원 (국토부 실거래가 기준)")
         elif hogangnono_price:
             market_price = hogangnono_price
-        elif molit_price:
-            market_price = molit_price
-            log("  [안내] 호갱노노 데이터 없어 국토부 데이터만 사용")
+            log("  [안내] 국토부 데이터 없어 호갱노노 데이터로 대체")
         else:
             market_price = None
 
