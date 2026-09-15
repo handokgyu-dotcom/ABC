@@ -4,8 +4,9 @@
 
    이 파일에는 값만 있다. 규칙은 components.css 가 갖는다.
 
-   밝은 흰 캔버스 + 단 하나의 토스 블루. 다크 모드를 기본 캔버스로
+   밝은 흰 캔버스 + 단 하나의 브랜드 색. 다크 모드를 기본 캔버스로
    쓰지 않는다(문서: "Don't use dark mode as the default canvas").
+   브랜드 색만 문서의 토스 블루 대신 삼표 CI 블루로 바꿔 넣었다.
    ══════════════════════════════════════════════════════════════ */
 
 :root{
@@ -15,7 +16,7 @@
   --bg:             #ffffff;   /* 캔버스 */
   --bg-alt:         #f9fafb;
   --surface:        #f2f4f6;   /* 쿨그레이 표면 — 입력칸 바탕 */
-  --surface-2:      #e8f3ff;   /* 블루 워시 — 콜아웃·보조버튼 */
+  --surface-2:      #e5f4fb;   /* 블루 워시 — 콜아웃·보조버튼 */
 
   --text:           #191f28;   /* 헤드라인 */
   --text-secondary: #333d4b;   /* 본문 */
@@ -25,17 +26,29 @@
   --border:         #e5e8eb;
   --border-strong:  #d1d6db;
 
-  /* 토스 블루는 이 시스템의 유일한 브랜드 색이다.
-     상태색(success/warning/danger)은 오직 상태에만 쓰고 장식에 재사용하지 않는다. */
-  --accent:         #3182f6;
-  --accent-hover:   #1b64da;
-  --accent-deep:    #1e40af;
-  --accent-soft:    #e8f3ff;
+  /* ── 브랜드: 삼표 CI 블루 (logo.svg 의 #0095CE) ──
+     이 시스템의 유일한 브랜드 색이다. 상태색(success/warning/danger)은
+     오직 상태에만 쓰고 장식에 재사용하지 않는다.
+
+     대비 때문에 두 값으로 나눠 쓴다.
+       --brand  #0095CE  CI 원색. 로고와 '글자가 아닌' 표시자(밑줄·막대)에만.
+                         흰 배경 대비 3.39:1 — 비텍스트 3:1 기준은 통과하지만
+                         본문 텍스트(4.5:1)로는 못 쓴다.
+       --accent #0079A8  같은 색조를 한 단계 내린 값. 흰 글자를 얹는 버튼과
+                         흰 배경 위 글자·테두리에 쓴다. 양쪽 다 4.88:1 로 AA 통과.
+     즉 로고는 CI 원색 그대로 나가고, 누를 수 있는 것들만 한 톤 진하다. */
+  --brand:          #0095ce;
+  --accent:         #0079a8;
+  --accent-hover:   #006c96;
+  --accent-deep:    #005f84;
+  --on-accent:      #ffffff;
+  --accent-soft:    #e5f4fb;
+  --accent-soft-hover:#d3ecf9;
 
   --success:        #00c896;   /* 민트 — 추진 */
   --warning:        #ff9500;   /* 앰버 — 보류 */
   --danger:         #f04452;   /* 코랄 — 불가 */
-  --info:           #3182f6;
+  --info:           #0079a8;
 
   /* 상태색의 옅은 바탕 */
   --success-soft:   #e5f9f3;

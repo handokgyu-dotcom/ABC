@@ -38,6 +38,9 @@
   gap:var(--sp-5) var(--sp-4);
 }
 .grid--wide{ grid-template-columns:repeat(auto-fit,minmax(300px,1fr)) }
+/* 시작화면 카드는 4장이라 auto-fit 이 3+1 로 떨어진다. 데스크톱에서는 2x2 로 고정. */
+.grid--cards{ grid-template-columns:repeat(auto-fit,minmax(280px,1fr)) }
+@media (min-width:880px){ .grid--cards{ grid-template-columns:repeat(2,1fr) } }
 
 /* ═══════════════════════ 타이포 ═══════════════════════ */
 
@@ -98,13 +101,13 @@
 .btn:disabled{ opacity:.4; cursor:not-allowed }
 
 /* 주 동작 — 토스 블루 채움 */
-.btn--primary{ background:var(--accent); color:#f9fafb }
+.btn--primary{ background:var(--accent); color:var(--on-accent) }
 .btn--primary:hover:not(:disabled){ background:var(--accent-hover) }
 .btn--primary:active:not(:disabled){ background:var(--accent-deep) }
 
 /* 보조 동작 — 옅은 블루 채움 + 진한 블루 글자. 이 조합이 브랜드의 서명. */
-.btn--secondary{ background:var(--surface-2); color:var(--accent-hover) }
-.btn--secondary:hover:not(:disabled){ background:#d8ebff }
+.btn--secondary{ background:var(--surface-2); color:var(--accent) }
+.btn--secondary:hover:not(:disabled){ background:var(--accent-soft-hover) }
 
 .btn--sm{ height:var(--btn-h-sm); padding-inline:var(--sp-4); font-size:var(--t-14) }
 .btn--block{ width:100% }
@@ -234,13 +237,13 @@
   background:var(--surface-2);
   border:0;
   border-radius:var(--r-btn);
-  color:var(--accent-hover);
+  color:var(--accent);
   font-family:var(--font-sans);
   font-size:var(--t-14);
   font-weight:var(--w-medium);
   cursor:pointer;
 }
-.filefield input[type=file]::file-selector-button:hover{ background:#d8ebff }
+.filefield input[type=file]::file-selector-button:hover{ background:var(--accent-soft-hover) }
 .filefield__got{ font-size:var(--t-14); font-weight:var(--w-medium); color:var(--success) }
 
 /* 큰 드롭존 */
@@ -306,7 +309,7 @@
 .badge--ok  { background:var(--success-soft); color:#00a37a }
 .badge--warn{ background:var(--warning-soft); color:#c26f00 }
 .badge--crit{ background:var(--danger-soft);  color:var(--danger) }
-.badge--solid{ background:var(--accent); color:#f9fafb }
+.badge--solid{ background:var(--accent); color:var(--on-accent) }
 
 /* 등급 A~E */
 .grade{
@@ -321,7 +324,7 @@
 }
 .grade--a{ background:var(--success-soft); color:#00a37a }
 .grade--b,
-.grade--c{ background:var(--accent-soft);  color:var(--accent-hover) }
+.grade--c{ background:var(--accent-soft);  color:var(--accent) }
 .grade--d,
 .grade--e{ background:var(--warning-soft); color:#c26f00 }
 .grade--none{ background:var(--surface); color:var(--text-dim) }
@@ -386,7 +389,7 @@
   border-radius:var(--r-card);
   padding:var(--sp-5);
 }
-.stat__label{ font-size:var(--t-14); font-weight:var(--w-medium); color:var(--accent-hover) }
+.stat__label{ font-size:var(--t-14); font-weight:var(--w-medium); color:var(--accent) }
 .stat__value{
   margin-top:var(--sp-2);
   font-size:var(--t-24);
@@ -429,8 +432,8 @@
 .segmented button i{ font-style:normal; font-size:11px; line-height:1.2; color:var(--text-dim); word-break:keep-all }
 .segmented button:hover:not(:disabled){ background:var(--border) }
 .segmented button:active:not(:disabled){ transform:scale(.98) }
-.segmented button[aria-pressed="true"]{ background:var(--accent); color:#f9fafb }
-.segmented button[aria-pressed="true"] i{ color:rgba(249,250,251,.8) }
+.segmented button[aria-pressed="true"]{ background:var(--accent); color:var(--on-accent) }
+.segmented button[aria-pressed="true"] i{ color:rgba(255,255,255,.75) }
 .segmented button:disabled{ opacity:.4; cursor:not-allowed }
 
 /* ═══════════════════════ 사이트 헤더 ═══════════════════════
@@ -446,9 +449,11 @@
   display:flex; align-items:center; gap:var(--sp-6); flex-wrap:wrap;
   padding-block:var(--sp-2);
 }
-.brand{ display:flex; align-items:baseline; gap:var(--sp-2); flex:none }
-.brand__mark{ font-size:var(--t-14); color:var(--text-dim) }
-.brand__name{ font-size:var(--t-17); font-weight:var(--w-bold); color:var(--text) }
+.brand{ display:flex; align-items:center; gap:var(--sp-3); flex:none }
+/* 로고는 인라인 SVG 라 currentColor 를 따라간다 */
+.brand__logo{ display:block; height:20px; width:auto; color:var(--brand); flex:none }
+.brand__divider{ width:1px; height:16px; background:var(--border); flex:none }
+.brand__name{ font-size:var(--t-15); font-weight:var(--w-medium); color:var(--text-secondary); white-space:nowrap }
 
 .site-nav{ display:flex; gap:var(--sp-1); margin-left:auto; flex-wrap:wrap }
 .site-nav a{
@@ -464,40 +469,12 @@
 }
 .site-nav a:hover{ color:var(--text) }
 .site-nav a[aria-current="page"]{ color:var(--accent) }
+/* 밑줄은 글자가 아니므로 CI 원색을 그대로 쓴다 (비텍스트 3:1 기준 통과).
+   글자 색은 한 톤 진한 --accent 라야 4.5:1 을 넘긴다. */
 .site-nav a[aria-current="page"]::after{
   content:""; position:absolute; left:var(--sp-3); right:var(--sp-3); bottom:-1px;
-  height:2px; background:var(--accent); border-radius:var(--r-full);
+  height:3px; background:var(--brand); border-radius:var(--r-full);
 }
-
-/* ═══════════════════════ 단계 레일 ═══════════════════════ */
-
-.steps{
-  display:flex;
-  gap:var(--sp-1);
-  border-bottom:1px solid var(--border);
-  overflow-x:auto;
-}
-.steps button{
-  flex:1 1 0; min-width:150px;
-  position:relative;
-  padding:var(--sp-3) var(--sp-4) var(--sp-4);
-  text-align:left;
-  color:var(--text-muted);
-  border-radius:var(--r-btn) var(--r-btn) 0 0;
-  transition:background-color .15s, color .15s;
-}
-.steps button:hover{ background:var(--bg-alt); color:var(--text-secondary) }
-.steps__num{ display:block; font-size:var(--t-12); font-weight:var(--w-medium); color:var(--text-dim) }
-.steps__name{ display:block; margin-top:2px; font-size:var(--t-17); font-weight:var(--w-bold); color:inherit }
-.steps button[aria-selected="true"]{ color:var(--accent) }
-.steps button[aria-selected="true"] .steps__num{ color:var(--accent) }
-.steps button[aria-selected="true"]::after{
-  content:""; position:absolute; left:0; right:0; bottom:-1px; height:2px;
-  background:var(--accent); border-radius:var(--r-full);
-}
-.steps button.is-done .steps__num::before{ content:"✓ "; color:var(--success) }
-
-.step-panel{ padding-block:var(--sp-8) }
 
 /* ═══════════════════════ 섹션 머리 ═══════════════════════ */
 
@@ -529,6 +506,5 @@
   .container{ padding-inline:var(--sp-4) }
   .band{ padding-block:var(--sp-8) }
   .card{ padding:var(--sp-4) }
-  .step-panel{ padding-block:var(--sp-6) }
   .grid{ grid-template-columns:1fr }
 }

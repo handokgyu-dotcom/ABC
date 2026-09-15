@@ -1,0 +1,25 @@
+/* ══════════════════════════════════════════════════════════════
+   collateral.css — 연대보증 심사(담보가치 평가) 페이지 고유 레이아웃
+   물건지 표 안에 펼쳐지는 실거래 상세 행만 여기서 다룬다.
+   ══════════════════════════════════════════════════════════════ */
+
+/* ── 담보가치: 물건지별 실거래 상세 (표 안에 펼쳐지는 행) ── */
+.trade-detail{
+  padding:var(--sp-4);
+  background:var(--bg-alt);
+  border-radius:var(--r-card);
+}
+.trade-detail__head{
+  display:flex; align-items:baseline; gap:var(--sp-3); flex-wrap:wrap;
+  margin-bottom:var(--sp-2);
+  font-size:var(--t-14);
+  color:var(--text-muted);
+}
+.trade-detail__head + .trade-detail__head{ margin-top:var(--sp-5) }
+.trade-detail table{
+  background:var(--bg);
+  border-radius:var(--r-btn);
+  overflow:hidden;
+}
+/* 상세 표는 조밀하게 — 기본 64px 행 높이를 쓰지 않는다 */
+.trade-detail .table tbody td{ height:auto }

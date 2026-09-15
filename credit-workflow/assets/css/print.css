@@ -3,8 +3,8 @@
 
    화면이 이미 흰 캔버스라 색을 뒤집을 일은 없다. 이 파일이 하는 일은
    화면용 크롬(헤더·페이지)을 걷어내고, #ts_print_area 한 장만 A4
-   가로로 앉히는 것이다. 내용은 surety.js 의 buildTSPrintHTML() /
-   buildSVPrintHTML() 가 그때그때 채운다.
+   가로로 앉히는 것이다. 내용은 pour.js 의 buildTSPrintHTML() 과
+   site.js 의 buildSVPrintHTML() 이 그때그때 채운다.
    ══════════════════════════════════════════════════════════════ */
 
 /* 화면에서는 숨어 있다가 인쇄 때만 나타난다 */

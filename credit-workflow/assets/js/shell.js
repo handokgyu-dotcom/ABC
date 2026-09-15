@@ -14,7 +14,9 @@
 var ROUTES = {
   home:   {page:"page-home",   title:"레미콘 여신심사"},
   credit: {page:"page-credit", title:"신용거래 심사 · 레미콘 여신심사"},
-  surety: {page:"page-surety", title:"연대보증 심사 · 레미콘 여신심사"}
+  surety: {page:"page-surety", title:"담보가치 평가 · 레미콘 여신심사"},
+  pour:   {page:"page-pour",   title:"타설계획 · 레미콘 여신심사"},
+  site:   {page:"page-site",   title:"현장 현황 · 레미콘 여신심사"}
 };
 var DEFAULT = "home";
 

@@ -1,27 +1,18 @@
 /* ══════════════════════════════════════════════════════════════
-   surety.js — 연대보증 심사 페이지
-   원본: remicon_credit_workflow.html 의 <script>
+   pour.js — 타설계획
 
-   계산 로직은 손대지 않았다. 단가표 · 월중여신/신청여신 산출식 ·
-   localStorage 키(yeosin.v4) · BUILD 상수 · 인쇄 양식 전부 그대로다.
+   현장별 월간 타설량으로 매출채권·월중여신·신청여신을 산출한다.
+   단가표와 계산식은 분리 전과 완전히 동일하다.
 
-   바뀐 것은 껍데기뿐:
-     · 숫자 포맷/DOM 조회/저장 헬퍼를 utils.js(App)에서 가져다 쓴다
-       (전에는 credit.js 와 같은 일을 두 벌로 갖고 있었다)
-     · 생성하는 마크업이 components.css 의 공통 클래스를 쓴다
-       (.act ghost → .btn, .warnbox → .callout, class="n" → class="num" …)
-     · 피크 월중여신 강조를 인라인 style 대신 .ts-derived--peak 클래스로
-     · 사용자가 친 현장명/비고와 백엔드가 준 주소를 esc() 로 이스케이프한다
-       — 전에는 현장명에 따옴표를 넣으면 value 속성이 깨져 표가 무너졌다
-     · 레일/패널 조회를 #page-surety 안으로 한정하고, showPanel() 의
-       scrollIntoView 는 페이지가 보일 때만 동작하도록 가드한다
+   저장 키는 페이지별로 분리했다(예전에는 현장 현황과 한 덩어리로
+   yeosin.v4 에 같이 들어가 있었다).
    ══════════════════════════════════════════════════════════════ */
 (function(){
-const BUILD='2026-09-11.17';
-const KEY='yeosin.v4';
-/* 숫자 포맷·DOM 조회·저장은 전부 utils.js(App) 소유다. 예전에는 이 파일과
-   credit.js 가 같은 일을 두 벌로 갖고 있었다. */
+const BUILD='2026-09-15.1';
+const KEY='yeosin.pour.v1';
 const {$, el, esc, fmtInt: W, fmtEok: formatEok, parseNum: num, setStatus, storage} = App;
+const setSt=(id,state,txt)=>setStatus(id,state,txt);
+
 /* ── 레미콘 단가표 (100% 기준 · 굵은골재 최대치수 25mm · 서울·경기·인천 · 2026.04.01 적용 · 원/㎥ · VAT별도) ── */
 const TS_PRICE_TABLE={
   80:  {'13.5':84560,'15':86330,'16':87840,'18':95880,'21':97800,'24':102230,'27':106020,'30':111390,'33':113940,'35':116260,'38':125000,'40':130840},
@@ -35,35 +26,8 @@ const TS_SLUMPS=Object.keys(TS_PRICE_TABLE);
 $('i_ts_strength').innerHTML=TS_STRENGTHS.map(s=>'<option value="'+s+'"'+(s==='21'?' selected':'')+'>'+s+'</option>').join('');
 $('i_ts_slump').innerHTML=TS_SLUMPS.map(s=>'<option value="'+s+'"'+(s==='150'?' selected':'')+'>'+s+'</option>').join('');
 
-/* ── 단계 이동 : 선택한 STEP 패널만 보이고 나머지는 숨긴다 ── */
-/* 셸 안에서는 신용 페이지도 같은 문서에 있으므로, 레일/패널 조회를
-   이 페이지 컨테이너 안으로 한정한다. */
-const PAGE=document.getElementById('page-surety');
-const rail=[...PAGE.querySelectorAll('.steps button')];
-const panels=[...PAGE.querySelectorAll('#stepPanels > .step-panel')];
-function showPanel(id){
-  panels.forEach(p=>{p.hidden=(p.id!==id)});
-  const el=$(id);
-  /* 초기 1회 호출은 셸이 이 페이지를 아직 hidden 으로 둔 상태에서 일어난다.
-     숨은 요소로 스크롤하면 엉뚱한 위치로 튀므로 보이는 동안에만 스크롤한다. */
-  if(el&&!PAGE.hidden) el.scrollIntoView({behavior:'smooth',block:'start'});
-}
-rail.forEach(b=>b.addEventListener('click',()=>{
-  rail.forEach(x=>x.setAttribute('aria-selected',x===b));
-  showPanel(b.dataset.go);
-}));
-showPanel(rail[0].dataset.go); // 초기 화면: 첫 STEP만 표시
-function markDone(i,on){if(rail[i])rail[i].classList.toggle('is-done',!!on)}
-
-const setSt=(id,state,txt)=>setStatus(id,state,txt);
 /* ── 로컬 임시저장 (이 브라우저에만) ── */
-const IDS=[
- 'i_ts_start','i_ts_end','i_ts_days','i_ts_strength','i_ts_slump','i_ts_discount','i_ts_roundunit',
- 'i_sv_name','i_sv_addr','i_sv_from','i_sv_to','i_sv_purpose','i_sv_direct',
- 'i_sv_orderer','i_sv_contractor','i_sv_trust','i_sv_paycond','i_sv_totalvol','i_sv_ourvol','i_sv_copour',
- 'i_sv_households','i_sv_soldhh','i_sv_soldrate','i_sv_price','i_sv_marketprice',
- 'i_sv_subway','i_sv_school','i_sv_office','i_sv_mart','i_sv_hospital','i_sv_ic',
- 'i_sv_nearbysale','i_sv_environment','i_sv_footfall','i_sv_etc'];
+const IDS=['i_ts_start','i_ts_end','i_ts_days','i_ts_strength','i_ts_slump','i_ts_discount','i_ts_roundunit'];
 function save(){
   try{const o={};IDS.forEach(k=>o[k]=$(k).value);
     o._ts=[...$('ts_tbl').querySelectorAll('tbody tr')].map(tr=>{
@@ -83,7 +47,6 @@ function load(){
     (o._ts||[]).forEach(d=>tsRow(d));
     return true;}catch(e){return false}
 }
-
 /* ── 초기 상태: 예시 데이터 ── */
 function seed(){
   if(!$('i_ts_start').value){const t=new Date();$('i_ts_start').value=t.getFullYear()+'-'+String(t.getMonth()+1).padStart(2,'0');}
@@ -96,137 +59,9 @@ function seed(){
   tsRow(ex);
 }
 function resetAll(){
-  storage.remove('yeosin.v1','yeosin.v3',KEY);
+  storage.remove(KEY,'yeosin.v1','yeosin.v3','yeosin.v4');
   location.reload();
 }
-
-/* ── STEP 1 : 담보가치 자동 평가 (streamlit-app FastAPI 백엔드 호출) ── */
-/* 개발 기본값. streamlit-app/api_server.py 를 로컬에서 uvicorn으로 띄운 주소. */
-const API_BASE='http://localhost:8000';
-let COLLATERAL_RESULT=null;
-
-if($('f_collateral_pdf'))$('f_collateral_pdf').addEventListener('change',e=>{
-  const f=e.target.files&&e.target.files[0];
-  $('f_collateral_pdf_got').textContent=f?(f.name+' · '+Math.round(f.size/1024)+' KB'):'';
-});
-
-function fmtTradeDate(y,m,d){
-  if(y&&m&&d)return y+'.'+String(m).padStart(2,'0')+'.'+String(d).padStart(2,'0');
-  return '—';
-}
-
-function hgnnTradeRows(trades){
-  return (trades||[]).slice(0,5).map(t=>{
-    const dm=String(t.date||'').match(/^(\d{4})-(\d{2})-(\d{2})/);
-    return '<tr>'+
-      '<td>'+(dm?fmtTradeDate(dm[1],dm[2],dm[3]):'—')+'</td>'+
-      '<td class="num">'+(t.floor!=null?t.floor+'층':'—')+'</td>'+
-      '<td class="num">'+(t.price!=null?W(Math.round(t.price*10000)):'—')+'</td>'+
-      '</tr>';
-  }).join('');
-}
-
-function molitTradeRows(trades){
-  return (trades||[]).slice(0,5).map(t=>{
-    const amt=parseInt(String(t.dealAmount||'').replace(/,/g,''),10);
-    return '<tr>'+
-      '<td>'+fmtTradeDate(t.dealYear,t.dealMonth,t.dealDay)+'</td>'+
-      '<td class="num">'+(t.floor!=null?t.floor+'층':'—')+'</td>'+
-      '<td class="num">'+(t.excluUseAr?Number(t.excluUseAr).toFixed(1)+'㎡':'—')+'</td>'+
-      '<td class="num">'+(!isNaN(amt)?W(amt*10000):'—')+'</td>'+
-      '</tr>';
-  }).join('');
-}
-
-function renderTradeDetail(p){
-  const hgnnRows=hgnnTradeRows(p.recent_trades);
-  const molitRows=molitTradeRows(p.molit_trades);
-  return '<div class="trade-detail">'+
-    '<div class="trade-detail__head"><span class="eyebrow eyebrow--sm">국토부 실거래가 (최근 3개월)</span>'+(p.molit_price!=null?'평균 '+W(p.molit_price)+' · '+(p.molit_trade_count||0)+'건':'거래 없음')+'</div>'+
-    (molitRows?'<table class="table table--mini"><thead><tr><th>거래일</th><th class="num">층</th><th class="num">전용면적</th><th class="num">금액</th></tr></thead><tbody>'+molitRows+'</tbody></table>':'<div class="muted">최근 거래 내역 없음</div>')+
-    '<div class="trade-detail__head"><span class="eyebrow eyebrow--sm">호갱노노 최근 실거래</span>'+(p.hogangnono_price!=null?'평균 '+W(p.hogangnono_price):'거래 없음')+'</div>'+
-    (hgnnRows?'<table class="table table--mini"><thead><tr><th>거래일</th><th class="num">층</th><th class="num">금액</th></tr></thead><tbody>'+hgnnRows+'</tbody></table>':'<div class="muted">최근 거래 내역 없음</div>')+
-    '</div>';
-}
-
-function renderCollateralResult(data){
-  const tbody=$('collateral_tbl').querySelector('tbody');
-  tbody.innerHTML='';
-  (data.properties||[]).forEach(p=>{
-    const tr=document.createElement('tr');
-    const rateTxt=p.hammer_rate!=null?Math.round(p.hammer_rate*100)+'%'+(p.matched_rate_region?' · '+p.matched_rate_region:''):'—';
-    tr.innerHTML=
-      '<td>'+esc(p.address||'주소 미상')+(p.error?'<div class="muted">'+esc(p.error)+'</div>':'')+'</td>'+
-      '<td class="num">'+(p.total_priority_amount!=null?W(p.total_priority_amount):'—')+'</td>'+
-      '<td class="num">'+(p.market_price!=null?W(p.market_price):'—')+'</td>'+
-      '<td class="num">'+rateTxt+'</td>'+
-      '<td class="num">'+(p.collateral_value!=null?W(p.collateral_value):'—')+'</td>';
-    tbody.appendChild(tr);
-
-    const dtr=document.createElement('tr');
-    const dtd=document.createElement('td');
-    dtd.colSpan=5;
-    dtd.innerHTML=renderTradeDetail(p);
-    dtr.appendChild(dtd);
-    tbody.appendChild(dtr);
-  });
-  $('o_collateral_total').textContent=data.grand_total_collateral!=null?W(data.grand_total_collateral):'—';
-}
-
-async function evaluateCollateral(){
-  const f=$('f_collateral_pdf').files&&$('f_collateral_pdf').files[0];
-  if(!f){setSt('st_collateral','off','PDF를 업로드하십시오');return}
-
-  setSt('st_collateral','run','평가 중… (물건지 감지 · 실거래가 조회)');
-  $('btn_collateral_report').disabled=true;
-  $('collateral_flag').innerHTML='';
-
-  const fd=new FormData();
-  fd.append('pdf',f);
-  fd.append('hammer_rate',(Number($('i_collateral_rate').value)||80)/100);
-
-  try{
-    const res=await fetch(API_BASE+'/api/collateral/evaluate',{method:'POST',body:fd});
-    if(!res.ok)throw new Error(await res.text());
-    const data=await res.json();
-    COLLATERAL_RESULT=data;
-    renderCollateralResult(data);
-    setSt('st_collateral','on','평가 완료 · 물건지 '+(data.properties||[]).length+'개');
-    $('btn_collateral_report').disabled=false;
-    markDone(0,true);
-  }catch(err){
-    setSt('st_collateral','off','평가 실패');
-    $('collateral_flag').innerHTML='<div class="callout callout--warn"><b>담보가치 평가 실패.</b> '+
-      (err&&err.message?err.message:'백엔드 API('+API_BASE+') 연결을 확인하십시오')+'</div>';
-    markDone(0,false);
-  }
-}
-
-async function downloadCollateralReport(){
-  if(!COLLATERAL_RESULT)return;
-  try{
-    const res=await fetch(API_BASE+'/api/collateral/report',{
-      method:'POST',
-      headers:{'Content-Type':'application/json'},
-      body:JSON.stringify(COLLATERAL_RESULT)
-    });
-    if(!res.ok)throw new Error(await res.text());
-    const blob=await res.blob();
-    const url=URL.createObjectURL(blob);
-    const a=document.createElement('a');
-    a.href=url; a.download='담보가치_리포트.pdf';
-    document.body.appendChild(a); a.click(); a.remove();
-    URL.revokeObjectURL(url);
-  }catch(err){
-    $('collateral_flag').innerHTML='<div class="callout callout--warn"><b>리포트 생성 실패.</b> '+
-      (err&&err.message?err.message:'')+'</div>';
-  }
-}
-
-if($('btn_collateral_eval'))$('btn_collateral_eval').addEventListener('click',evaluateCollateral);
-if($('btn_collateral_report'))$('btn_collateral_report').addEventListener('click',downloadCollateralReport);
-
-if(!load())seed();
 
 /* ── STEP 2 : 타설계획 (월별 칸은 백만원 단위 입력) ──
    타설기간(시작~종료 연월)으로 실제 개월 수만큼 월 컬럼을 동적 생성한다.
@@ -433,46 +268,8 @@ $('btn_reset_ts').addEventListener('click',resetAll);
   $(id).addEventListener('input',()=>{calcTS();save()});
   $(id).addEventListener('change',()=>{calcTS();save()});
 });
-renderTSHead(); calcTS();
-
-/* ── STEP 3 : 현장 현황 (계산 없는 단순 입력 · 저장만) ── */
-['i_sv_name','i_sv_addr','i_sv_from','i_sv_to','i_sv_purpose','i_sv_direct',
- 'i_sv_orderer','i_sv_contractor','i_sv_trust','i_sv_paycond','i_sv_totalvol','i_sv_ourvol','i_sv_copour',
- 'i_sv_households','i_sv_soldhh','i_sv_soldrate','i_sv_price','i_sv_marketprice',
- 'i_sv_subway','i_sv_school','i_sv_office','i_sv_mart','i_sv_hospital','i_sv_ic',
- 'i_sv_nearbysale','i_sv_environment','i_sv_footfall','i_sv_etc'].forEach(id=>{
-  $(id).addEventListener('input',save);
-  $(id).addEventListener('change',save);
-});
-$('btn_reset_sv').addEventListener('click',resetAll);
-
-function buildSVPrintHTML(){
-  const v=id=>{const el=$(id);const val=el?el.value:'';return val?val:'&nbsp;'};
-  const period=($('i_sv_from').value||$('i_sv_to').value)
-    ? (($('i_sv_from').value||'')+' ~ '+($('i_sv_to').value||''))
-    : '&nbsp;';
-  return ''+
-    '<h1>■ 현장 현황 (현재 당사납품현장)</h1>'+
-    '<p class="pr-sub">작성일: '+new Date().toISOString().slice(0,10)+'</p>'+
-    '<table class="sv-tbl">'+
-      // 전체 표를 11칸 기준 그리드로 맞춰서, 그룹마다 칸 수가 달라도 좌우 끝이 가지런히 정렬되게 한다
-      '<tr><th colspan="2">현장명(공사유형)</th><th colspan="2">현장위치(주소)</th><th colspan="3">공사기간</th><th colspan="2">현장 목적</th><th colspan="2">직접/도급</th></tr>'+
-      '<tr><td colspan="2">'+v('i_sv_name')+'</td><td colspan="2">'+v('i_sv_addr')+'</td><td colspan="3">'+period+'</td><td colspan="2">'+v('i_sv_purpose')+'</td><td colspan="2">'+v('i_sv_direct')+'</td></tr>'+
-      '<tr><th colspan="2">발주처</th><th colspan="2">시공사</th><th>신탁사</th><th colspan="2">기성지급조건</th><th>총물량(㎥)</th><th>당사물량(㎥)</th><th colspan="2">공동타설사</th></tr>'+
-      '<tr><td colspan="2">'+v('i_sv_orderer')+'</td><td colspan="2">'+v('i_sv_contractor')+'</td><td>'+v('i_sv_trust')+'</td><td colspan="2">'+v('i_sv_paycond')+'</td><td>'+v('i_sv_totalvol')+'</td><td>'+v('i_sv_ourvol')+'</td><td colspan="2">'+v('i_sv_copour')+'</td></tr>'+
-      '<tr><th rowspan="2">총세대수</th><th rowspan="2">분양세대수</th><th rowspan="2">분양률</th><th rowspan="2">분양가(평)</th><th rowspan="2">주변시세(평)</th><th colspan="6">인프라</th></tr>'+
-      '<tr><th>지하철</th><th>학교</th><th>관공서</th><th>마트</th><th>병원</th><th>IC</th></tr>'+
-      '<tr><td>'+v('i_sv_households')+'</td><td>'+v('i_sv_soldhh')+'</td><td>'+v('i_sv_soldrate')+'</td>'+
-        '<td>'+v('i_sv_price')+'</td><td>'+v('i_sv_marketprice')+'</td>'+
-        '<td>'+v('i_sv_subway')+'</td><td>'+v('i_sv_school')+'</td><td>'+v('i_sv_office')+'</td><td>'+v('i_sv_mart')+'</td><td>'+v('i_sv_hospital')+'</td><td>'+v('i_sv_ic')+'</td></tr>'+
-      '<tr><th colspan="3">주변분양현황</th><th colspan="2">주변환경</th><th colspan="2">유동인구비율</th><th colspan="4">기타 의견</th></tr>'+
-      '<tr><td colspan="3">'+v('i_sv_nearbysale')+'</td><td colspan="2">'+v('i_sv_environment')+'</td><td colspan="2">'+v('i_sv_footfall')+'</td><td colspan="4" style="text-align:left">'+v('i_sv_etc')+'</td></tr>'+
-    '</table>'+
-    '<p class="pr-foot">※ 한장으로 현장 상황을 알수 있게 최대한 상세히 작성해 주세요</p>';
-}
-function printSV(){
-  $('ts_print_area').innerHTML=buildSVPrintHTML();
-  window.print();
-}
-$('btn_sv_pdf').addEventListener('click',printSV);
+/* 초기화: 저장분이 있으면 복원하고, 없으면 예시 한 줄로 시작한다.
+   load()/seed() 둘 다 내부에서 renderTSHead() 를 부르므로 여기서는 계산만 돌린다. */
+if(!load())seed();
+calcTS();
 })();

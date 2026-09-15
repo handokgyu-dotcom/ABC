@@ -1,8 +1,7 @@
 /* ══════════════════════════════════════════════════════════════
-   surety.css — 연대보증 심사 페이지 고유 레이아웃
-
-   단계 레일(.steps)·카드·필드·표·버튼은 전부 components.css 소유다.
-   여기 남은 것은 타설계획 표의 월 컬럼 처리와 담보 실거래 상세뿐.
+   pour.css — 타설계획 페이지 고유 레이아웃
+   카드·필드·표·버튼은 전부 components.css 소유다. 여기 남은 것은
+   월 컬럼 폭 처리와 셀 안 파생값 3줄의 높이 고정뿐.
    ══════════════════════════════════════════════════════════════ */
 
 /* ── 타설계획 표 ──
@@ -45,24 +44,3 @@
   color:var(--text-dim);
 }
 .ts-legend .is-loan{ color:var(--accent) }
-
-/* ── 담보가치: 물건지별 실거래 상세 (표 안에 펼쳐지는 행) ── */
-.trade-detail{
-  padding:var(--sp-4);
-  background:var(--bg-alt);
-  border-radius:var(--r-card);
-}
-.trade-detail__head{
-  display:flex; align-items:baseline; gap:var(--sp-3); flex-wrap:wrap;
-  margin-bottom:var(--sp-2);
-  font-size:var(--t-14);
-  color:var(--text-muted);
-}
-.trade-detail__head + .trade-detail__head{ margin-top:var(--sp-5) }
-.trade-detail table{
-  background:var(--bg);
-  border-radius:var(--r-btn);
-  overflow:hidden;
-}
-/* 상세 표는 조밀하게 — 기본 64px 행 높이를 쓰지 않는다 */
-.trade-detail .table tbody td{ height:auto }
