@@ -209,10 +209,18 @@ footer.foot{max-width:1060px;margin:26px auto 0;color:var(--ink-3);font-size:11.
 #ts_print_area td.pr-rowlabel{text-align:left;color:#555;white-space:nowrap;background:#f7f7f7}
 #ts_print_area td.pr-rowlabel.pr-loan{color:#a4241a}
 #ts_print_area .pr-total{margin-top:16px;font-size:13px;font-weight:700}
+#ts_print_area .pr-foot{margin-top:10px;font-size:11px;color:#333}
+/* 현장 현황(STEP7) 표: 원본 양식처럼 넉넉한 칸 + 옅은 파란 헤더 */
+#ts_print_area table.sv-tbl{font-size:13px}
+#ts_print_area table.sv-tbl th,#ts_print_area table.sv-tbl td{border:1px solid #333}
+#ts_print_area table.sv-tbl th{background:#dce6f7;font-weight:700;padding:9px 8px;height:20px}
+#ts_print_area table.sv-tbl td{background:#fff;padding:16px 8px;height:44px}
 @media print{
-  body *{visibility:hidden}
-  #ts_print_area,#ts_print_area *{visibility:visible}
-  #ts_print_area{position:absolute;left:0;top:0;width:100%;display:block!important}
+  /* visibility:hidden 방식은 숨긴 요소가 레이아웃 공간을 그대로 차지해
+     빈 페이지가 끼어들 수 있어, display:none으로 완전히 제거한다 */
+  header.top,.rail,main,footer.foot{display:none!important}
+  #ts_print_area{display:block!important}
+  .wrap{max-width:none!important;margin:0!important}
   @page{size:A4 landscape;margin:12mm}
 }
 </style>
@@ -233,6 +241,7 @@ footer.foot{max-width:1060px;margin:26px auto 0;color:var(--ink-3);font-size:11.
   <button type="button" role="tab" id="t4" aria-selected="false" data-go="p4"><span class="num">STEP 04</span><span class="nm">심사 결과</span></button>
   <button type="button" role="tab" id="t5" aria-selected="false" data-go="p5"><span class="num">STEP 05</span><span class="nm">담보가치 평가</span></button>
   <button type="button" role="tab" id="t6" aria-selected="false" data-go="p6"><span class="num">STEP 06</span><span class="nm">타설계획</span></button>
+  <button type="button" role="tab" id="t7" aria-selected="false" data-go="p7"><span class="num">STEP 07</span><span class="nm">현장 현황</span></button>
 </div>
 
 <main>
@@ -531,6 +540,74 @@ footer.foot{max-width:1060px;margin:26px auto 0;color:var(--ink-3);font-size:11.
   <div class="row-actions">
     <button type="button" class="act" id="btn_ts_pdf">PDF 다운로드</button>
     <button type="button" class="act ghost" id="btn_reset_ts">입력 초기화</button>
+  </div>
+</section>
+
+<!-- ══════════ STEP 7 ══════════ -->
+<section class="panel" id="p7">
+  <h2><span class="stepno">07</span>현장 현황</h2>
+  <p class="hint">현재 당사납품현장의 상황을 한 장으로 파악할 수 있게 최대한 상세히 작성하십시오.</p>
+
+  <div class="ocr">
+    <div class="sub-h"><span class="tag">현장 개요</span></div>
+    <div class="grid">
+      <label class="f"><span>현장명(공사유형)</span><input type="text" id="i_sv_name"></label>
+      <label class="f"><span>현장위치(주소)</span><input type="text" id="i_sv_addr"></label>
+      <label class="f"><span>공사기간 시작</span><input type="date" id="i_sv_from"></label>
+      <label class="f"><span>공사기간 종료</span><input type="date" id="i_sv_to"></label>
+      <label class="f"><span>현장 목적</span><input type="text" id="i_sv_purpose"></label>
+      <label class="f"><span>직접/도급</span>
+        <select id="i_sv_direct"><option value=""></option><option>직접</option><option>도급</option></select></label>
+    </div>
+  </div>
+
+  <div class="ocr" style="margin-top:16px">
+    <div class="sub-h"><span class="tag">발주 · 물량</span></div>
+    <div class="grid">
+      <label class="f"><span>발주처</span><input type="text" id="i_sv_orderer"></label>
+      <label class="f"><span>시공사</span><input type="text" id="i_sv_contractor"></label>
+      <label class="f"><span>신탁사</span><input type="text" id="i_sv_trust"></label>
+      <label class="f"><span>기성지급조건</span><input type="text" id="i_sv_paycond"></label>
+      <label class="f"><span>총물량 <em>· ㎥</em></span><input type="text" id="i_sv_totalvol" class="num"></label>
+      <label class="f"><span>당사물량 <em>· ㎥</em></span><input type="text" id="i_sv_ourvol" class="num"></label>
+      <label class="f"><span>공동타설사</span><input type="text" id="i_sv_copour"></label>
+    </div>
+  </div>
+
+  <div class="ocr" style="margin-top:16px">
+    <div class="sub-h"><span class="tag">분양 · 인프라</span></div>
+    <div class="grid">
+      <label class="f"><span>총세대수</span><input type="text" id="i_sv_households" class="num"></label>
+      <label class="f"><span>분양세대수</span><input type="text" id="i_sv_soldhh" class="num"></label>
+      <label class="f"><span>분양률</span><input type="text" id="i_sv_soldrate" class="num"></label>
+      <label class="f"><span>분양가 <em>· 평</em></span><input type="text" id="i_sv_price" class="num"></label>
+      <label class="f"><span>주변시세 <em>· 평</em></span><input type="text" id="i_sv_marketprice" class="num"></label>
+    </div>
+    <div class="sub-h" style="margin-top:14px"><span class="tag">인프라</span></div>
+    <div class="grid">
+      <label class="f"><span>지하철</span><input type="text" id="i_sv_subway"></label>
+      <label class="f"><span>학교</span><input type="text" id="i_sv_school"></label>
+      <label class="f"><span>관공서</span><input type="text" id="i_sv_office"></label>
+      <label class="f"><span>마트</span><input type="text" id="i_sv_mart"></label>
+      <label class="f"><span>병원</span><input type="text" id="i_sv_hospital"></label>
+      <label class="f"><span>IC</span><input type="text" id="i_sv_ic"></label>
+    </div>
+  </div>
+
+  <div class="ocr" style="margin-top:16px">
+    <div class="sub-h"><span class="tag">주변 여건 · 기타</span></div>
+    <div class="grid">
+      <label class="f"><span>주변분양현황</span><input type="text" id="i_sv_nearbysale"></label>
+      <label class="f"><span>주변환경</span><input type="text" id="i_sv_environment"></label>
+      <label class="f"><span>유동인구비율</span><input type="text" id="i_sv_footfall"></label>
+    </div>
+    <label class="f" style="margin-top:14px"><span>기타 의견</span>
+      <textarea id="i_sv_etc" rows="3" style="resize:vertical"></textarea></label>
+  </div>
+
+  <div class="row-actions">
+    <button type="button" class="act" id="btn_sv_pdf">PDF 다운로드</button>
+    <button type="button" class="act ghost" id="btn_reset_sv">입력 초기화</button>
   </div>
 </section>
 </main>
@@ -890,7 +967,12 @@ function renderSummary(){
 /* ── 로컬 임시저장 (이 브라우저에만) ── */
 const IDS=['i_code','i_pay','i_name','i_ceo','i_site','i_gr','i_grrel','i_grmax','i_gr2','i_grrel2','i_grmax2','i_gubun','i_type',
  'i_region','i_addr','i_owner','i_gap','i_rtms','j_no','j_co','j_kind','j_insured','j_us','j_co_n','j_from','j_to','j_amt',
- 'i_ts_start','i_ts_end','i_ts_days','i_ts_strength','i_ts_slump','i_ts_discount','i_ts_roundunit'];
+ 'i_ts_start','i_ts_end','i_ts_days','i_ts_strength','i_ts_slump','i_ts_discount','i_ts_roundunit',
+ 'i_sv_name','i_sv_addr','i_sv_from','i_sv_to','i_sv_purpose','i_sv_direct',
+ 'i_sv_orderer','i_sv_contractor','i_sv_trust','i_sv_paycond','i_sv_totalvol','i_sv_ourvol','i_sv_copour',
+ 'i_sv_households','i_sv_soldhh','i_sv_soldrate','i_sv_price','i_sv_marketprice',
+ 'i_sv_subway','i_sv_school','i_sv_office','i_sv_mart','i_sv_hospital','i_sv_ic',
+ 'i_sv_nearbysale','i_sv_environment','i_sv_footfall','i_sv_etc'];
 function save(){
   try{const o={};IDS.forEach(k=>o[k]=$(k).value);
     o._eul=[...$('eul_tbl').querySelectorAll('tbody tr')].map(tr=>({
@@ -1311,6 +1393,47 @@ $('btn_reset_ts').addEventListener('click',resetAll);
   $(id).addEventListener('change',()=>{calcTS();save()});
 });
 renderTSHead(); calcTS();
+
+/* ── STEP 7 : 현장 현황 (계산 없는 단순 입력 · 저장만) ── */
+['i_sv_name','i_sv_addr','i_sv_from','i_sv_to','i_sv_purpose','i_sv_direct',
+ 'i_sv_orderer','i_sv_contractor','i_sv_trust','i_sv_paycond','i_sv_totalvol','i_sv_ourvol','i_sv_copour',
+ 'i_sv_households','i_sv_soldhh','i_sv_soldrate','i_sv_price','i_sv_marketprice',
+ 'i_sv_subway','i_sv_school','i_sv_office','i_sv_mart','i_sv_hospital','i_sv_ic',
+ 'i_sv_nearbysale','i_sv_environment','i_sv_footfall','i_sv_etc'].forEach(id=>{
+  $(id).addEventListener('input',save);
+  $(id).addEventListener('change',save);
+});
+$('btn_reset_sv').addEventListener('click',resetAll);
+
+function buildSVPrintHTML(){
+  const v=id=>{const el=$(id);const val=el?el.value:'';return val?val:'&nbsp;'};
+  const period=($('i_sv_from').value||$('i_sv_to').value)
+    ? (($('i_sv_from').value||'')+' ~ '+($('i_sv_to').value||''))
+    : '&nbsp;';
+  return ''+
+    '<h1>■ 현장 현황 (현재 당사납품현장)</h1>'+
+    '<p class="pr-sub">작성일: '+new Date().toISOString().slice(0,10)+'</p>'+
+    '<table class="sv-tbl">'+
+      // 전체 표를 11칸 기준 그리드로 맞춰서, 그룹마다 칸 수가 달라도 좌우 끝이 가지런히 정렬되게 한다
+      '<tr><th colspan="2">현장명(공사유형)</th><th colspan="2">현장위치(주소)</th><th colspan="3">공사기간</th><th colspan="2">현장 목적</th><th colspan="2">직접/도급</th></tr>'+
+      '<tr><td colspan="2">'+v('i_sv_name')+'</td><td colspan="2">'+v('i_sv_addr')+'</td><td colspan="3">'+period+'</td><td colspan="2">'+v('i_sv_purpose')+'</td><td colspan="2">'+v('i_sv_direct')+'</td></tr>'+
+      '<tr><th colspan="2">발주처</th><th colspan="2">시공사</th><th>신탁사</th><th colspan="2">기성지급조건</th><th>총물량(㎥)</th><th>당사물량(㎥)</th><th colspan="2">공동타설사</th></tr>'+
+      '<tr><td colspan="2">'+v('i_sv_orderer')+'</td><td colspan="2">'+v('i_sv_contractor')+'</td><td>'+v('i_sv_trust')+'</td><td colspan="2">'+v('i_sv_paycond')+'</td><td>'+v('i_sv_totalvol')+'</td><td>'+v('i_sv_ourvol')+'</td><td colspan="2">'+v('i_sv_copour')+'</td></tr>'+
+      '<tr><th rowspan="2">총세대수</th><th rowspan="2">분양세대수</th><th rowspan="2">분양률</th><th rowspan="2">분양가(평)</th><th rowspan="2">주변시세(평)</th><th colspan="6">인프라</th></tr>'+
+      '<tr><th>지하철</th><th>학교</th><th>관공서</th><th>마트</th><th>병원</th><th>IC</th></tr>'+
+      '<tr><td>'+v('i_sv_households')+'</td><td>'+v('i_sv_soldhh')+'</td><td>'+v('i_sv_soldrate')+'</td>'+
+        '<td>'+v('i_sv_price')+'</td><td>'+v('i_sv_marketprice')+'</td>'+
+        '<td>'+v('i_sv_subway')+'</td><td>'+v('i_sv_school')+'</td><td>'+v('i_sv_office')+'</td><td>'+v('i_sv_mart')+'</td><td>'+v('i_sv_hospital')+'</td><td>'+v('i_sv_ic')+'</td></tr>'+
+      '<tr><th colspan="3">주변분양현황</th><th colspan="2">주변환경</th><th colspan="2">유동인구비율</th><th colspan="4">기타 의견</th></tr>'+
+      '<tr><td colspan="3">'+v('i_sv_nearbysale')+'</td><td colspan="2">'+v('i_sv_environment')+'</td><td colspan="2">'+v('i_sv_footfall')+'</td><td colspan="4" style="text-align:left">'+v('i_sv_etc')+'</td></tr>'+
+    '</table>'+
+    '<p class="pr-foot">※ 한장으로 현장 상황을 알수 있게 최대한 상세히 작성해 주세요</p>';
+}
+function printSV(){
+  $('ts_print_area').innerHTML=buildSVPrintHTML();
+  window.print();
+}
+$('btn_sv_pdf').addEventListener('click',printSV);
 })();
 </script>
 
