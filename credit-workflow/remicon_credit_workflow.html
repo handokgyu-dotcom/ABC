@@ -408,12 +408,18 @@ const TS_SLUMPS=Object.keys(TS_PRICE_TABLE);
 $('i_ts_strength').innerHTML=TS_STRENGTHS.map(s=>'<option value="'+s+'"'+(s==='21'?' selected':'')+'>'+s+'</option>').join('');
 $('i_ts_slump').innerHTML=TS_SLUMPS.map(s=>'<option value="'+s+'"'+(s==='150'?' selected':'')+'>'+s+'</option>').join('');
 
-/* ── 단계 이동 ── */
+/* ── 단계 이동 : 선택한 STEP 패널만 보이고 나머지는 숨긴다 ── */
 const rail=[...document.querySelectorAll('.rail button')];
+const panels=[...document.querySelectorAll('main > section.panel')];
+function showPanel(id){
+  panels.forEach(p=>{p.hidden=(p.id!==id)});
+  const el=$(id); if(el) el.scrollIntoView({behavior:'smooth',block:'start'});
+}
 rail.forEach(b=>b.addEventListener('click',()=>{
   rail.forEach(x=>x.setAttribute('aria-selected',x===b));
-  const el=$(b.dataset.go); if(el) el.scrollIntoView({behavior:'smooth',block:'start'});
+  showPanel(b.dataset.go);
 }));
+showPanel(rail[0].dataset.go); // 초기 화면: 첫 STEP만 표시
 function markDone(i,on){if(rail[i])rail[i].classList.toggle('done',!!on)}
 
 function setSt(id,cls,txt){const e=$(id);if(!e)return;e.className='st '+cls;e.textContent=txt}
