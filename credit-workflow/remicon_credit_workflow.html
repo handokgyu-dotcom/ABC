@@ -996,10 +996,10 @@ function renderTradeDetail(p){
   const hgnnRows=hgnnTradeRows(p.recent_trades);
   const molitRows=molitTradeRows(p.molit_trades);
   return '<div class="trade-detail">'+
-    '<div class="sub-h"><span class="tag">호갱노노 최근 실거래</span>'+(p.hogangnono_price!=null?'평균 '+W(p.hogangnono_price):'거래 없음')+'</div>'+
-    (hgnnRows?'<table class="mini"><thead><tr><th>거래일</th><th class="n">층</th><th class="n">금액</th></tr></thead><tbody>'+hgnnRows+'</tbody></table>':'<div class="muted">최근 거래 내역 없음</div>')+
-    '<div class="sub-h" style="margin-top:12px"><span class="tag">국토부 실거래가 (최근 3개월)</span>'+(p.molit_price!=null?'평균 '+W(p.molit_price)+' · '+(p.molit_trade_count||0)+'건':'거래 없음')+'</div>'+
+    '<div class="sub-h"><span class="tag">국토부 실거래가 (최근 3개월)</span>'+(p.molit_price!=null?'평균 '+W(p.molit_price)+' · '+(p.molit_trade_count||0)+'건':'거래 없음')+'</div>'+
     (molitRows?'<table class="mini"><thead><tr><th>거래일</th><th class="n">층</th><th class="n">전용면적</th><th class="n">금액</th></tr></thead><tbody>'+molitRows+'</tbody></table>':'<div class="muted">최근 거래 내역 없음</div>')+
+    '<div class="sub-h" style="margin-top:12px"><span class="tag">호갱노노 최근 실거래</span>'+(p.hogangnono_price!=null?'평균 '+W(p.hogangnono_price):'거래 없음')+'</div>'+
+    (hgnnRows?'<table class="mini"><thead><tr><th>거래일</th><th class="n">층</th><th class="n">금액</th></tr></thead><tbody>'+hgnnRows+'</tbody></table>':'<div class="muted">최근 거래 내역 없음</div>')+
     '</div>';
 }
 
