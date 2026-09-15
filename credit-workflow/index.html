@@ -3,16 +3,17 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<meta name="color-scheme" content="dark">
+<meta name="color-scheme" content="light">
 <title>레미콘 여신심사</title>
 
-<!-- Pretendard: Universal Sans 대체 (한글·라틴 한 패밀리, 동적 서브셋) -->
+<!-- Toss Product Sans 는 비공개 서체라, 문서가 지정한 폴백 Pretendard 로 그린다
+     (한글·라틴 한 패밀리, 동적 서브셋) -->
 <link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin>
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable-dynamic-subset.css">
-<!-- Geist Mono: 문서가 지정한 브랜드 동반 모노 -->
+<!-- JetBrains Mono: 문서가 지정한 모노 (거래 ID·코드용) -->
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Geist+Mono:wght@400;500&display=swap">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500&display=swap">
 
 <link rel="stylesheet" href="assets/css/tokens.css">
 <link rel="stylesheet" href="assets/css/base.css">
@@ -49,7 +50,7 @@
 
   <div class="container pb-4xl">
     <div class="grid grid--wide">
-      <a class="card" href="#credit">
+      <a class="card card--link" href="#credit">
         <span class="eyebrow eyebrow--sm eyebrow--mute">Credit</span>
         <h2 class="display-sm mt-md">신용거래 심사</h2>
         <p class="body-sm dim mt-md">
@@ -61,10 +62,10 @@
           <li>11개 항목 중 10개 자동 · 현금흐름등급은 게이지 판독</li>
           <li>추진 기준 70점 컷 판정</li>
         </ul>
-        <span class="btn btn--sm mt-xl self-start">평가표 열기</span>
+        <span class="card__foot"><span class="btn btn--sm btn--secondary">평가표 열기</span></span>
       </a>
 
-      <a class="card" href="#surety">
+      <a class="card card--link" href="#surety">
         <span class="eyebrow eyebrow--sm eyebrow--mute">Surety</span>
         <h2 class="display-sm mt-md">연대보증 심사</h2>
         <p class="body-sm dim mt-md">
@@ -76,7 +77,7 @@
           <li>STEP 02 타설계획 · 월중여신 · 신청여신 산출</li>
           <li>STEP 03 현장 현황 · PDF 다운로드</li>
         </ul>
-        <span class="btn btn--sm mt-xl self-start">워크플로 열기</span>
+        <span class="card__foot"><span class="btn btn--sm btn--secondary">워크플로 열기</span></span>
       </a>
     </div>
 
@@ -137,14 +138,14 @@
         <div class="sheet__row sheet__row--head">
           <span>NO</span>
           <span>평가 항목</span>
-          <span style="text-align:center">등급 기준 · 평가 &nbsp;|&nbsp; A 100% · B 80% · C 60% · D 40% · E 20%</span>
-          <span style="text-align:right">배점</span>
+          <span class="ta-center">등급 기준 · 평가 &nbsp;|&nbsp; A 100% · B 80% · C 60% · D 40% · E 20%</span>
+          <span class="ta-right">배점</span>
         </div>
       </div>
 
       <aside class="card score-panel">
         <span class="badge" id="demoFlag" hidden>산출 결과</span>
-        <span class="eyebrow eyebrow--sm eyebrow--mute mt-sm" style="display:block">합산점수</span>
+        <span class="eyebrow eyebrow--sm eyebrow--mute mt-sm">합산점수</span>
         <div class="score-panel__score"><span id="scoreVal">0.0</span><small>/ 100</small></div>
 
         <div class="meter">
@@ -232,7 +233,7 @@
           </div>
           <div class="cluster mt-lg">
             <button type="button" class="btn btn--primary" id="btn_collateral_eval">담보가치 평가 실행</button>
-            <button type="button" class="btn" id="btn_collateral_report" disabled>PDF 리포트 다운로드</button>
+            <button type="button" class="btn btn--secondary" id="btn_collateral_report" disabled>PDF 리포트 다운로드</button>
           </div>
         </div>
 
@@ -282,7 +283,7 @@
               <span class="field__label">대금결제조건 <em>· 월말청구 · 현금은 고정, 일수만 입력</em></span>
               <span class="cluster">
                 <span class="mono muted">월말청구</span>
-                <input type="number" id="i_ts_days" class="input input--num input--tight" min="0" style="width:80px">
+                <input type="number" id="i_ts_days" class="input input--num" min="0" style="width:88px">
                 <span class="mono muted">일 현금</span>
               </span>
             </label>
@@ -323,7 +324,7 @@
           </table>
         </div>
         <div class="cluster mt-lg">
-          <button type="button" class="btn btn--sm" id="btn_add_ts">+ 현장 행 추가</button>
+          <button type="button" class="btn btn--sm btn--secondary" id="btn_add_ts">+ 현장 행 추가</button>
         </div>
 
         <div id="ts_flag"></div>
@@ -346,7 +347,7 @@
 
         <div class="cluster mt-lg">
           <button type="button" class="btn btn--primary" id="btn_ts_pdf">PDF 다운로드</button>
-          <button type="button" class="btn" id="btn_reset_ts">입력 초기화</button>
+          <button type="button" class="btn btn--secondary" id="btn_reset_ts">입력 초기화</button>
         </div>
       </section>
 
@@ -419,7 +420,7 @@
 
         <div class="cluster mt-lg">
           <button type="button" class="btn btn--primary" id="btn_sv_pdf">PDF 다운로드</button>
-          <button type="button" class="btn" id="btn_reset_sv">입력 초기화</button>
+          <button type="button" class="btn btn--secondary" id="btn_reset_sv">입력 초기화</button>
         </div>
       </section>
     </div>

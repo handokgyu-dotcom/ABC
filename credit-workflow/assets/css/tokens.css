@@ -1,112 +1,109 @@
 /* ══════════════════════════════════════════════════════════════
    tokens.css — 디자인 토큰 (단일 출처)
-   출처: DESIGN-x.ai.md (xAI design language)
+   출처: DESIGN.md (Toss — Playful Fintech)
 
    이 파일에는 값만 있다. 규칙은 components.css 가 갖는다.
-   색·타이포·간격을 바꿀 일이 생기면 여기만 고치면 된다.
 
-   xAI 는 다크 캔버스 전용이다. 라이트 모드 대응물을 만들지 않는다.
-   (문서: "Don't introduce a light-mode counterpart.")
-   인쇄는 예외이며 print.css 가 흰 종이 기준으로 따로 덮어쓴다.
+   밝은 흰 캔버스 + 단 하나의 토스 블루. 다크 모드를 기본 캔버스로
+   쓰지 않는다(문서: "Don't use dark mode as the default canvas").
    ══════════════════════════════════════════════════════════════ */
 
 :root{
-  /* 폼 컨트롤(select·date·file)까지 다크로 렌더되게 한다 */
-  color-scheme: dark;
+  color-scheme: light;
 
   /* ─────────────────────────── 색 ─────────────────────────── */
-  --primary:        #ffffff;
-  --on-primary:     #0a0a0a;
+  --bg:             #ffffff;   /* 캔버스 */
+  --bg-alt:         #f9fafb;
+  --surface:        #f2f4f6;   /* 쿨그레이 표면 — 입력칸 바탕 */
+  --surface-2:      #e8f3ff;   /* 블루 워시 — 콜아웃·보조버튼 */
 
-  --ink:            #ffffff;   /* 기본 텍스트 */
-  --ink-hover:      #fafaf7;
-  --body:           #dadbdf;   /* 보조 본문 */
-  --body-mid:       #7d8187;   /* 중간 강조 */
-  --mute:           #7d8187;   /* 캡션·미세활자 */
+  --text:           #191f28;   /* 헤드라인 */
+  --text-secondary: #333d4b;   /* 본문 */
+  --text-muted:     #6b7684;
+  --text-dim:       #8b95a1;
 
-  --canvas:         #0a0a0a;   /* 유일한 페이지 바탕 */
-  --canvas-soft:    #1a1c20;   /* 호버·툴팁·입력 바탕 */
-  --canvas-card:    #191919;   /* 카드 바탕 */
-  --canvas-mid:     #363a3f;   /* 중첩 표면 */
-  --hairline:       #212327;   /* 1px 구분선 — 이 시스템의 유일한 입체 표현 */
+  --border:         #e5e8eb;
+  --border-strong:  #d1d6db;
 
-  --accent-sunset:      #ff7a17;
-  --accent-sunset-soft: #ffc285;
-  --accent-dusk:        #7c3aed;
-  --accent-twilight:    #c4b5fd;
-  --accent-breeze:      #a0c3ec;
-  --accent-midnight:    #0d1726;
+  /* 토스 블루는 이 시스템의 유일한 브랜드 색이다.
+     상태색(success/warning/danger)은 오직 상태에만 쓰고 장식에 재사용하지 않는다. */
+  --accent:         #3182f6;
+  --accent-hover:   #1b64da;
+  --accent-deep:    #1e40af;
+  --accent-soft:    #e8f3ff;
 
-  /* 아웃라인 필의 테두리. 문서가 "solid white 가 아니라 반투명 흰색"이라고
-     못박은 런타임 값이다. hairline 보다 이쪽이 버튼의 정답. */
-  --pill-border:      rgba(255,255,255,.25);
-  --pill-border-hover:rgba(255,255,255,.45);
+  --success:        #00c896;   /* 민트 — 추진 */
+  --warning:        #ff9500;   /* 앰버 — 보류 */
+  --danger:         #f04452;   /* 코랄 — 불가 */
+  --info:           #3182f6;
 
-  /* ───────────────────── 시맨틱 (확장 3개) ─────────────────────
-     xAI 원본에는 시맨틱 팔레트가 없다("The brand doesn't surface a
-     separate semantic palette"). 그러나 이 도구는 「추진 / 보류 / 불가」
-     판정이 핵심이라 최소 3개만 확장한다.
-     warn 은 새 색을 만들지 않고 브랜드 토큰 accent-sunset 을 그대로 쓴다. */
-  --sem-ok:        #4ade80;
-  --sem-warn:      var(--accent-sunset);
-  --sem-crit:      #f87171;
-  --sem-ok-wash:   rgba(74,222,128,.10);
-  --sem-warn-wash: rgba(255,122,23,.10);
-  --sem-crit-wash: rgba(248,113,113,.10);
-  --sem-ok-line:   rgba(74,222,128,.35);
-  --sem-warn-line: rgba(255,122,23,.35);
-  --sem-crit-line: rgba(248,113,113,.35);
+  /* 상태색의 옅은 바탕 */
+  --success-soft:   #e5f9f3;
+  --warning-soft:   #fff4e5;
+  --danger-soft:    #feecee;
 
   /* ────────────────────────── 서체 ──────────────────────────
-     Universal Sans 는 유료라 대체한다. Pretendard 는 Inter 파생이라
-     문서가 요구하는 기하학적 인상과 음수 자간이 한글에도 먹힌다.
-     Geist Mono 는 문서가 지정한 브랜드 동반 서체. */
-  --font-sans: Pretendard, Inter, system-ui, -apple-system, "Segoe UI", sans-serif;
-  --font-mono: "Geist Mono", "IBM Plex Mono", ui-monospace, SFMono-Regular, Menlo, Monaco, monospace;
+     Toss Product Sans 는 비공개 서체라 문서가 지정한 폴백 순서를 그대로 쓴다.
+     실제로 그려지는 것은 Pretendard(한글·라틴 한 패밀리)다. */
+  --font-sans: "Toss Product Sans", Pretendard, -apple-system, BlinkMacSystemFont,
+               "Apple SD Gothic Neo", "Noto Sans KR", system-ui, sans-serif;
+  --font-mono: "JetBrains Mono", "SF Mono", ui-monospace, SFMono-Regular, Menlo, monospace;
 
-  /* 크기 — 디스플레이는 모바일에서 줄어든다 (문서: 96 → 48px) */
-  --t-display-xl: clamp(48px, 7.2vw, 96px);
-  --t-display-lg: clamp(40px, 5.6vw, 72px);
-  --t-display-md: clamp(30px, 3.8vw, 48px);
-  --t-display-sm: clamp(24px, 2.6vw, 32px);
-  --t-display-xs: 20px;
-  --t-body-lg:    18px;
-  --t-body-md:    16px;
-  --t-body-sm:    14px;
-  --t-caption:    14px;
-  --t-caption-sm: 12px;
+  /* 크기 스케일 12 / 14 / 15 / 17 / 20 / 24 / 32 / 40 / 50 / 66 */
+  --t-12:12px; --t-14:14px; --t-15:15px; --t-17:17px; --t-20:20px;
+  --t-24:24px; --t-32:32px; --t-40:40px;
+  --t-50:clamp(28px, 4.4vw, 50px);   /* 문서: 헤드라인 66 → 28 로 축소 */
+  --t-66:clamp(32px, 6.0vw, 66px);
 
-  /* 자간 — 문서의 px 값을 em 으로 환산해 clamp 와 같이 움직이게 한다.
-     96px/-2.4px, 72px/-1.8px, 48px/-1.2px 는 전부 -0.025em 이다. */
-  --track-display:  -.025em;
-  --track-display-sm: -.019em;
-  --track-mono:     .1em;     /* 14px 기준 1.4px */
-  --track-mono-sm:  .1em;     /* 12px 기준 1.2px */
+  /* 무게 — 한 화면에 두 가지를 넘기지 않는 것이 원칙.
+     본문 400 + 헤드라인 700 을 기본 쌍으로 두고, 컨트롤 라벨에만 500 을 쓴다. */
+  --w-regular:  400;
+  --w-medium:   500;
+  --w-semibold: 600;
+  --w-bold:     700;
 
-  /* 무게 — 문서: "Weight 400 for everything. The brand never bolds." */
-  --w-regular: 400;
-  --w-medium:  500;   /* 표 헤더/배지 가독성 확보용, 디스플레이에는 쓰지 않는다 */
+  /* 큰 사이즈에서만 -1% 트래킹 */
+  --track-tight: -.01em;
 
   /* ────────────────────────── 간격 (4px 기준) ────────────────────────── */
-  --sp-xxs:  2px;
-  --sp-xs:   4px;
-  --sp-sm:   8px;
-  --sp-md:  12px;
-  --sp-lg:  16px;
-  --sp-xl:  24px;
-  --sp-2xl: 32px;
-  --sp-3xl: 48px;
-  --sp-4xl: 64px;
+  --sp-1:  4px;
+  --sp-2:  8px;
+  --sp-3: 12px;
+  --sp-4: 16px;
+  --sp-5: 20px;
+  --sp-6: 24px;
+  --sp-8: 32px;
+  --sp-12:48px;
 
-  /* ────────────────────────── 모서리 ────────────────────────── */
-  --r-none: 0px;
-  --r-sm:   8px;    /* 카드 */
-  --r-pill: 9999px; /* 모든 인터랙티브 요소 */
+  /* ────────────────────────── 모서리 ──────────────────────────
+     문서: 버튼 7px, 카드 12px. 16px 를 넘기지 않는다. */
+  --r-btn:   7px;
+  --r-card: 12px;
+  --r-input:12px;
+  --r-full: 9999px;   /* 배지·점 표시 전용 */
 
-  /* ────────────────────────── 레이아웃 ────────────────────────── */
+  /* ────────────────────────── 깊이 ──────────────────────────
+     문서: 소프트 섀도우 한 겹만. 중첩 금지, 뉴모피즘 금지. */
+  --shadow-card:  0 1px 3px rgba(25,31,40,.04);
+  --shadow-modal: 0 8px 24px rgba(25,31,40,.08);
+
+  /* ──────────────── 컨트롤 치수 ────────────────
+     모든 입력·버튼 높이를 토큰으로 못박는다. 이 값이 없으면 padding 이
+     조금만 달라져도(예: 표 안의 촘촘한 입력) 한 줄에서 높이가 어긋난다. */
+  --control-h:    52px;   /* 기본 입력/셀렉트 */
+  --control-h-sm: 40px;   /* 표 안 */
+  --btn-h:        48px;
+  --btn-h-sm:     36px;
+  --row-h:        64px;   /* 리스트 행 — 문서의 탭 타깃 규격 */
+
+  /* ────────────────────────── 레이아웃 ──────────────────────────
+     문서는 480px 모바일 칼럼을 1200px 셸 안에 둔다. 읽는 콘텐츠(.lane)는
+     그대로 480px 을 쓰지만, 12개월 타설표나 11행 채점표 같은 데이터 표면은
+     480px 에 넣으면 못 쓰게 되므로 셸 폭을 쓴다. 의도적 확장. */
   --container: 1200px;
-  --header-h:  56px;
+  --lane:       480px;
+  --header-h:    56px;
 
-  /* 문서: "The brand uses no shadows. Hairline borders carry all
-     elevation cues." 그림자 토큰을 두지 않는 것이 의도된 제약이다. */
+  /* 탭 피드백 96ms ease-out */
+  --press: 96ms ease-out;
 }

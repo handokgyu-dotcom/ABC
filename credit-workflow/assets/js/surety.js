@@ -257,7 +257,7 @@ function renderTSHead(){
   const months=getMonthList();
   $('ts_thead_row').innerHTML='<th>현장명</th>'+
     months.map(m=>'<th class="num">'+m.label+'</th>').join('')+
-    '<th>비고</th><th class="num">합계(㎥)</th><th class="num">매출채권(원)</th><th></th>';
+    '<th class="ts-note-col">비고</th><th class="num">합계(㎥)</th><th class="num">매출채권(원)</th><th></th>';
 }
 function rebuildTSRows(){
   // 기존 행 값을 연월 키로 보존한 채, 바뀐 기간에 맞춰 표를 다시 그린다.
@@ -286,7 +286,7 @@ function tsRow(d){
   tr.innerHTML='<td><input type="text" class="ts-site input input--tight" value="'+esc(d.site||'')+'" placeholder="현장명">'+
       '<div class="ts-legend"><span>매출채권</span><span class="is-loan">월중여신</span></div></td>'+
     monthTds+
-    '<td><input type="text" class="ts-note input input--tight" value="'+esc(d.note||'')+'"></td>'+
+    '<td class="ts-note-col"><input type="text" class="ts-note input input--tight" value="'+esc(d.note||'')+'"></td>'+
     '<td class="num ts-sum">—</td>'+
     '<td class="num ts-amt">—</td>'+
     '<td><button type="button" class="btn btn--sm ts-del">삭제</button></td>';

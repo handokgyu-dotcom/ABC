@@ -5,148 +5,161 @@
    여기 남은 것은 이 페이지에만 있는 두 덩어리뿐:
      ① 채점표(.sheet) — 11행 × [번호 / 항목 / A~E 선택 / 배점] 그리드
      ② 판독 로그(.uplog) — 업로드한 보고서에서 뽑은 값 목록
+
+   두 그리드 모두 열 폭을 고정하고 행 높이를 토큰에 맞춰, 행마다
+   높이가 들쭉날쭉해지지 않게 한다.
    ══════════════════════════════════════════════════════════════ */
 
 /* ── 채점표 + 점수 패널 2단 ── */
 .scorer{
   display:grid;
-  grid-template-columns:minmax(0,1fr) 300px;
-  gap:var(--sp-xl);
+  grid-template-columns:minmax(0,1fr) 320px;
+  gap:var(--sp-6);
   align-items:start;
 }
-@media (max-width:900px){ .scorer{ grid-template-columns:1fr } }
+@media (max-width:1000px){ .scorer{ grid-template-columns:1fr } }
 
 /* ── ① 채점표 ── */
 .sheet{ min-width:0 }
 
 .sheet__row{
   display:grid;
-  grid-template-columns:32px minmax(0,1.1fr) minmax(0,2.4fr) 56px;
-  gap:var(--sp-md);
+  grid-template-columns:36px minmax(0,1.1fr) minmax(0,2.4fr) 64px;
+  gap:var(--sp-4);
   align-items:center;
-  padding:var(--sp-md) var(--sp-lg);
-  border-bottom:1px solid var(--hairline);
+  min-height:var(--row-h);
+  padding:var(--sp-3) var(--sp-5);
+  border-bottom:1px solid var(--border);
 }
 .sheet__row:last-child{ border-bottom:0 }
 
-.sheet__row--head{ background:var(--canvas-soft); padding-block:var(--sp-sm) }
+.sheet__row--head{
+  min-height:0;
+  padding-block:var(--sp-3);
+  background:var(--bg-alt);
+  border-bottom:1px solid var(--border);
+}
 .sheet__row--head span{
-  font-family:var(--font-mono);
-  font-size:var(--t-caption-sm);
-  line-height:1.33;
-  letter-spacing:var(--track-mono-sm);
-  text-transform:uppercase;
-  color:var(--body-mid);
+  font-size:var(--t-12);
+  font-weight:var(--w-medium);
+  line-height:1.4;
+  color:var(--text-dim);
 }
 
-.sheet__no{
-  font-family:var(--font-mono); font-variant-numeric:tabular-nums;
-  font-size:var(--t-caption-sm); color:var(--mute);
-}
+.sheet__no{ font-size:var(--t-14); color:var(--text-dim); font-variant-numeric:tabular-nums }
 .sheet__item{ min-width:0 }
-.sheet__name{ font-size:var(--t-body-sm); line-height:1.35; color:var(--ink) }
-.sheet__weight{
-  margin-top:var(--sp-xxs);
-  font-family:var(--font-mono); font-size:var(--t-caption-sm);
-  letter-spacing:var(--track-mono-sm); color:var(--mute);
-}
+.sheet__name{ font-size:var(--t-15); font-weight:var(--w-medium); line-height:1.4; color:var(--text) }
+.sheet__weight{ margin-top:2px; font-size:var(--t-12); color:var(--text-dim); font-variant-numeric:tabular-nums }
 .sheet__pts{
-  font-family:var(--font-mono); font-variant-numeric:tabular-nums;
-  font-size:var(--t-body-md); text-align:right; color:var(--ink);
+  font-size:var(--t-17);
+  font-weight:var(--w-bold);
+  text-align:right;
+  font-variant-numeric:tabular-nums;
+  color:var(--text);
 }
-.sheet__pts.is-empty{ color:var(--mute) }
+.sheet__pts.is-empty{ color:var(--text-dim); font-weight:var(--w-regular) }
 
-.sheet__row--total{ background:var(--canvas-soft); border-top:1px solid var(--hairline) }
+.sheet__row--total{ background:var(--bg-alt) }
 
-@media (max-width:700px){
-  .sheet__row{ grid-template-columns:32px minmax(0,1fr) 56px; row-gap:var(--sp-md) }
+@media (max-width:760px){
+  .sheet__row{ grid-template-columns:36px minmax(0,1fr) 64px; row-gap:var(--sp-3) }
   .sheet__row .segmented{ grid-column:1 / -1 }
   .sheet__row--head{ display:none }
 }
 
 /* ── 점수 패널 (sticky) ── */
-.score-panel{ position:sticky; top:calc(var(--header-h) + var(--sp-lg)) }
+.score-panel{ position:sticky; top:calc(var(--header-h) + var(--sp-5)) }
 .score-panel__score{
-  display:flex; align-items:baseline; gap:var(--sp-sm);
-  margin-top:var(--sp-md);
-  font-family:var(--font-mono); font-variant-numeric:tabular-nums;
-  font-size:var(--t-display-md); line-height:1;
-  letter-spacing:var(--track-display);
-  color:var(--ink);
+  display:flex; align-items:baseline; gap:var(--sp-2);
+  margin-top:var(--sp-2);
+  font-size:var(--t-40);
+  font-weight:var(--w-bold);
+  line-height:1.1;
+  letter-spacing:var(--track-tight);
+  font-variant-numeric:tabular-nums;
+  color:var(--text);
 }
 .score-panel__score small{
-  font-size:var(--t-body-md); letter-spacing:0; color:var(--mute);
+  font-size:var(--t-17); font-weight:var(--w-regular); color:var(--text-dim);
 }
-/* 판정 — 시맨틱 3색이 붙는 유일한 자리 */
+
+/* 판정 — 상태색이 붙는 유일한 자리 */
 .verdict{
-  display:block; width:100%;
-  margin-top:var(--sp-lg); padding:var(--sp-md);
-  border:1px solid var(--hairline); border-radius:var(--r-pill);
-  background:transparent;
-  font-family:var(--font-mono); font-size:var(--t-caption-sm);
-  line-height:1.33; letter-spacing:var(--track-mono-sm);
-  text-transform:uppercase; text-align:center; color:var(--mute);
+  display:flex; align-items:center; justify-content:center;
+  width:100%; min-height:var(--btn-h);
+  margin-top:var(--sp-4); padding:var(--sp-3) var(--sp-4);
+  border-radius:var(--r-btn);
+  background:var(--surface);
+  font-size:var(--t-15);
+  font-weight:var(--w-medium);
+  text-align:center;
+  color:var(--text-muted);
 }
-.verdict--ok  { color:var(--sem-ok);   border-color:var(--sem-ok-line);   background:var(--sem-ok-wash) }
-.verdict--crit{ color:var(--sem-crit); border-color:var(--sem-crit-line); background:var(--sem-crit-wash) }
-.verdict--hold{ color:var(--sem-warn); border-color:var(--sem-warn-line); background:var(--sem-warn-wash) }
+.verdict--ok  { background:var(--success-soft); color:#00a37a }
+.verdict--hold{ background:var(--warning-soft); color:#c26f00 }
+.verdict--crit{ background:var(--danger-soft);  color:var(--danger) }
 
 /* ── ② 판독 로그 ── */
 .uplog__head{
-  display:flex; align-items:center; gap:var(--sp-md); flex-wrap:wrap;
-  padding:var(--sp-md) var(--sp-lg);
-  background:var(--canvas-soft);
-  border-bottom:1px solid var(--hairline);
+  display:flex; align-items:center; gap:var(--sp-3); flex-wrap:wrap;
+  min-height:var(--row-h);
+  padding:var(--sp-3) var(--sp-5);
+  background:var(--bg-alt);
+  border-bottom:1px solid var(--border);
 }
-.uplog__co{ font-size:var(--t-body-md); color:var(--ink) }
+.uplog__co{ font-size:var(--t-17); font-weight:var(--w-bold); color:var(--text) }
 .uplog__meta{
   flex:1; min-width:0;
-  font-family:var(--font-mono); font-size:var(--t-caption-sm);
-  color:var(--mute); overflow-wrap:anywhere;
+  font-size:var(--t-14); color:var(--text-dim); overflow-wrap:anywhere;
 }
 
 .uplog__row{
   display:grid;
-  grid-template-columns:28px minmax(0,1.1fr) minmax(0,1.3fr) 54px 96px;
-  gap:var(--sp-md);
+  grid-template-columns:32px minmax(0,1.1fr) minmax(0,1.4fr) 56px 110px;
+  gap:var(--sp-4);
   align-items:center;
-  padding:var(--sp-sm) var(--sp-lg);
-  border-bottom:1px solid var(--hairline);
-  font-size:var(--t-body-sm);
+  min-height:var(--row-h);
+  padding:var(--sp-3) var(--sp-5);
+  border-bottom:1px solid var(--border);
+  font-size:var(--t-14);
 }
 .uplog__row:last-child{ border-bottom:0 }
-.uplog__k{ font-family:var(--font-mono); font-variant-numeric:tabular-nums; color:var(--mute) }
-.uplog__name{ color:var(--body); min-width:0; overflow-wrap:anywhere }
-.uplog__val{ font-family:var(--font-mono); color:var(--ink); overflow-wrap:anywhere }
-.uplog__src{
-  font-family:var(--font-mono); font-size:var(--t-caption-sm);
-  letter-spacing:var(--track-mono-sm); color:var(--mute); text-align:right;
-}
+.uplog__k{ color:var(--text-dim); font-variant-numeric:tabular-nums }
+.uplog__name{ color:var(--text-secondary); min-width:0; overflow-wrap:anywhere }
+.uplog__val{ color:var(--text); font-variant-numeric:tabular-nums; overflow-wrap:anywhere }
+.uplog__src{ font-size:var(--t-12); color:var(--text-dim); text-align:right }
 .uplog__row.is-pending .uplog__val,
-.uplog__row.is-pending .uplog__name{ color:var(--sem-warn) }
-.uplog__row--sum{ background:var(--canvas-soft); border-bottom:0 }
+.uplog__row.is-pending .uplog__name{ color:#c26f00 }
+.uplog__row--sum{ background:var(--bg-alt); border-bottom:0 }
 
-.uplog__err{ padding:var(--sp-lg); color:var(--sem-crit); font-size:var(--t-body-sm); line-height:1.6 }
+.uplog__err{ padding:var(--sp-5); color:var(--danger); font-size:var(--t-15); line-height:1.6 }
 
 /* 게이지 판독 결과 확인 — 보고서 그림 + 담당자 정정 입력 */
-.confirm{ display:inline-flex; align-items:center; gap:var(--sp-sm); flex-wrap:wrap }
+.confirm{ display:inline-flex; align-items:center; gap:var(--sp-2); flex-wrap:wrap }
 .confirm__img{
-  height:52px; border:1px solid var(--hairline); border-radius:var(--r-sm);
-  background:#fff; display:block;
+  height:48px;
+  border:1px solid var(--border);
+  border-radius:var(--r-btn);
+  background:#fff;
+  display:block;
 }
-.confirm__msg{ font-family:var(--font-sans); font-size:var(--t-caption-sm); color:var(--sem-warn) }
-.confirm__ok{ font-family:var(--font-mono); font-size:var(--t-caption-sm); color:var(--ink) }
+.confirm__msg{ font-size:var(--t-14); color:#c26f00 }
+.confirm__ok{ font-size:var(--t-14); color:var(--text) }
 .confirm__input{
-  width:11ch; padding:var(--sp-xxs) var(--sp-sm);
-  background:var(--canvas-soft);
-  border:1px solid var(--sem-warn-line); border-radius:var(--r-sm);
-  color:var(--ink);
-  font-family:var(--font-mono); font-size:var(--t-caption-sm);
+  width:12ch; height:var(--control-h-sm);
+  padding-inline:var(--sp-3);
+  background:var(--bg);
+  border:1px solid var(--warning);
+  border-radius:var(--r-btn);
+  color:var(--text);
+  font-family:var(--font-sans);
+  font-size:var(--t-14);
 }
-.confirm__input.is-bad{ border-color:var(--sem-crit) }
+.confirm__input:focus{ outline:none; border-color:var(--accent); box-shadow:0 0 0 1px var(--accent) }
+.confirm__input.is-bad{ border-color:var(--danger); box-shadow:0 0 0 1px var(--danger) }
 
-@media (max-width:760px){
-  .uplog__row{ grid-template-columns:28px minmax(0,1fr) 54px; row-gap:var(--sp-xs) }
+@media (max-width:820px){
+  .uplog__row{ grid-template-columns:32px minmax(0,1fr) 56px; row-gap:var(--sp-1) }
   .uplog__val{ grid-column:2 / -1 }
   .uplog__src{ grid-column:2 / -1; text-align:left }
 }

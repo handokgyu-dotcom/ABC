@@ -1,12 +1,10 @@
 /* ══════════════════════════════════════════════════════════════
    print.css — 인쇄 전용 (타설계획 / 현장 현황 PDF)
 
-   화면은 다크 캔버스지만 인쇄는 무조건 흰 종이다. 근저당 서류를
-   #0a0a0a 로 뽑을 수는 없다. 그래서 이 파일만 토큰을 쓰지 않고
-   흑백을 직접 지정한다 — 유일하게 의도된 예외.
-
-   출력 대상은 #ts_print_area 하나뿐이고, 내용은 surety.js 의
-   buildTSPrintHTML() / buildSVPrintHTML() 가 그때그때 채운다.
+   화면이 이미 흰 캔버스라 색을 뒤집을 일은 없다. 이 파일이 하는 일은
+   화면용 크롬(헤더·페이지)을 걷어내고, #ts_print_area 한 장만 A4
+   가로로 앉히는 것이다. 내용은 surety.js 의 buildTSPrintHTML() /
+   buildSVPrintHTML() 가 그때그때 채운다.
    ══════════════════════════════════════════════════════════════ */
 
 /* 화면에서는 숨어 있다가 인쇄 때만 나타난다 */
@@ -15,23 +13,18 @@
 @media print{
   @page{ size:A4 landscape; margin:12mm }
 
-  /* 화면용 크롬은 전부 제거한다. #ts_print_area 는 .page 바깥에 있으므로
-     .page 를 통째로 숨겨도 출력물은 남는다.
+  /* #ts_print_area 는 .page 바깥에 있으므로 .page 를 통째로 숨겨도 출력물은 남는다.
      visibility:hidden 은 자리를 차지해 빈 페이지가 끼므로 display:none 을 쓴다. */
   .site-header,
   .page{ display:none !important }
 
-  html,body{
-    background:#fff !important;
-    color:#000 !important;
-  }
-  body{ font-family:"Pretendard", system-ui, sans-serif }
+  html,body{ background:#fff !important; color:#000 !important }
 
   #ts_print_area{
     display:block !important;
     background:#fff;
     color:#111;
-    font-family:"Pretendard", system-ui, sans-serif;
+    font-family:var(--font-sans);
   }
   #ts_print_area h1{ font-size:18px; margin:0 0 4px; font-weight:700 }
   #ts_print_area .pr-sub{ font-size:11px; color:#555; margin:0 0 14px }
