@@ -73,7 +73,7 @@ header.top .sub{color:var(--ink-2);font-size:13px;margin-top:6px}
 
 /* ── 패널 ── */
 main{display:grid;grid-template-columns:1fr;gap:0}
-section.panel{background:var(--surface);border:1px solid var(--line);border-top:0;padding:24px 22px 28px}
+section.panel{background:var(--surface);border:1px solid var(--line);border-top:0;padding:24px 22px 28px;min-width:0}
 section.panel:last-of-type{border-radius:0 0 3px 3px}
 .panel > h2{font-size:16px;font-weight:600;margin:0 0 4px;display:flex;align-items:baseline;gap:10px}
 .panel > h2 .stepno{font-family:"IBM Plex Mono",monospace;font-size:11px;color:var(--accent);font-weight:600;letter-spacing:.1em}
@@ -139,6 +139,13 @@ td.bad{color:var(--crit-ink);font-weight:600}
 .std{font-family:"IBM Plex Mono",monospace;font-size:10.5px;color:var(--crit-ink)}
 table.mini td,table.mini th{padding:5px 7px}
 table input,table select{padding:5px 7px;font-size:12.5px}
+#ts_tbl td{vertical-align:top}
+#ts_tbl td input{margin-top:0}
+/* 타설기간이 길어져 월 컬럼이 많아져도 표가 화면폭에 눌려 찌그러지지 않도록,
+   폭을 콘텐츠 기준으로 늘리고(overflow-x:auto인 .tw가 가로 스크롤 처리) 각 칸에 최소 너비를 둔다 */
+#ts_tbl{width:auto;min-width:100%}
+#ts_tbl th:first-child,#ts_tbl td:first-child{min-width:130px}
+#ts_tbl th.n,#ts_tbl td.n{min-width:82px}
 .trade-detail{padding:10px 9px 16px;background:var(--surface-2)}
 .trade-detail .sub-h{margin:0 0 6px}
 
@@ -189,6 +196,25 @@ footer.foot{max-width:1060px;margin:26px auto 0;color:var(--ink-3);font-size:11.
   .verdict .badge{text-align:left}
 }
 @media (prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important}}
+
+/* ── 타설계획 PDF(인쇄) 전용 뷰 ── */
+#ts_print_area{font-family:"IBM Plex Sans KR",sans-serif;color:#111;background:#fff}
+#ts_print_area h1{font-size:18px;margin:0 0 4px}
+#ts_print_area .pr-sub{font-size:11px;color:#555;margin:0 0 14px}
+#ts_print_area .pr-cond{font-size:12px;margin:0 0 14px;line-height:1.7}
+#ts_print_area table{border-collapse:collapse;width:100%;font-size:10.5px}
+#ts_print_area th,#ts_print_area td{border:1px solid #999;padding:4px 5px;text-align:center;vertical-align:middle}
+#ts_print_area th{background:#eee}
+#ts_print_area td.pr-site{text-align:center;font-weight:600}
+#ts_print_area td.pr-rowlabel{text-align:left;color:#555;white-space:nowrap;background:#f7f7f7}
+#ts_print_area td.pr-rowlabel.pr-loan{color:#a4241a}
+#ts_print_area .pr-total{margin-top:16px;font-size:13px;font-weight:700}
+@media print{
+  body *{visibility:hidden}
+  #ts_print_area,#ts_print_area *{visibility:visible}
+  #ts_print_area{position:absolute;left:0;top:0;width:100%;display:block!important}
+  @page{size:A4 landscape;margin:12mm}
+}
 </style>
 </head>
 <body>
@@ -206,6 +232,7 @@ footer.foot{max-width:1060px;margin:26px auto 0;color:var(--ink-3);font-size:11.
   <button type="button" role="tab" id="t3" aria-selected="false" data-go="p3"><span class="num">STEP 03</span><span class="nm">담보 평가</span></button>
   <button type="button" role="tab" id="t4" aria-selected="false" data-go="p4"><span class="num">STEP 04</span><span class="nm">심사 결과</span></button>
   <button type="button" role="tab" id="t5" aria-selected="false" data-go="p5"><span class="num">STEP 05</span><span class="nm">담보가치 평가</span></button>
+  <button type="button" role="tab" id="t6" aria-selected="false" data-go="p6"><span class="num">STEP 06</span><span class="nm">타설계획</span></button>
 </div>
 
 <main>
@@ -445,7 +472,69 @@ footer.foot{max-width:1060px;margin:26px auto 0;color:var(--ink-3);font-size:11.
   </div>
   <div id="collateral_flag"></div>
 </section>
+
+<!-- ══════════ STEP 6 ══════════ -->
+<section class="panel" id="p6">
+  <h2><span class="stepno">06</span>타설계획</h2>
+  <p class="hint">현장별 월간 타설량을 입력하면 매출채권 · 월중여신을 자동 계산합니다.
+    월별 칸은 <b>타설량(㎥)</b>으로 입력하십시오. 금액 = 타설량 × 적용단가.</p>
+
+  <div class="ocr">
+    <div class="sub-h"><span class="tag">기본 조건</span>타설기간 · 결제조건 · 단가</div>
+    <div class="grid">
+      <label class="f"><span>타설기간 시작</span><input type="month" id="i_ts_start"></label>
+      <label class="f"><span>타설기간 종료 <em>· 미입력시 시작월부터 9개월</em></span><input type="month" id="i_ts_end"></label>
+      <label class="f"><span>대금결제조건 <em>· 월말청구 · 현금은 고정, 일수만 입력</em></span>
+        <div style="display:flex;align-items:center;gap:6px">
+          <span class="mono muted">월말청구</span>
+          <input type="number" id="i_ts_days" class="num" min="0" style="width:70px">
+          <span class="mono muted">일 현금</span>
+        </div></label>
+    </div>
+    <p class="muted" id="ts_paycond_display" style="margin-top:10px"></p>
+    <div class="grid" style="margin-top:12px">
+      <label class="f"><span>호칭강도 <em>· MPa</em></span>
+        <select id="i_ts_strength"></select></label>
+      <label class="f"><span>슬럼프 <em>· mm</em></span>
+        <select id="i_ts_slump"></select></label>
+      <label class="f"><span>기준단가 <em>· 원/㎥ · 100% · 단가표 자동조회</em></span>
+        <input type="text" id="o_ts_baseprice" class="num" readonly></label>
+      <label class="f"><span>단가할인율 <em>· %</em></span>
+        <input type="number" id="i_ts_discount" class="num" min="0" max="100" step="0.1" value="100"></label>
+      <label class="f"><span>적용단가 <em>· 원/㎥ · 자동계산</em></span>
+        <input type="text" id="o_ts_price" class="num" readonly></label>
+    </div>
+    <p class="muted" style="margin-top:8px">레미콘 단가표 기준 · 굵은 골재 최대치수 25mm · 지역: 서울·경기·인천 · 적용일자: 2026.04.01 · 금액 VAT별도(원/㎥)</p>
+  </div>
+
+  <div class="tw" style="margin-top:18px">
+    <table class="mini" id="ts_tbl"><thead><tr id="ts_thead_row">
+      <th>현장명</th><th>비고</th><th class="n">합계(㎥)</th><th></th>
+    </tr></thead><tbody></tbody></table>
+  </div>
+  <div class="row-actions"><button type="button" class="act ghost" id="btn_add_ts">+ 현장 행 추가</button></div>
+
+  <div id="ts_flag"></div>
+
+  <div class="grid" style="margin-top:18px;max-width:260px">
+    <label class="f"><span>절상 단위</span>
+      <select id="i_ts_roundunit">
+        <option value="10000000">천만원</option>
+        <option value="50000000" selected>5천만원</option>
+        <option value="100000000">1억원</option>
+      </select></label>
+  </div>
+  <div class="total" style="margin-top:10px">
+    <div class="hi"><div class="k">신청여신 <em>· 최고 월중여신 + 선택 단위, 천만원 단위 절사</em></div><div class="v" id="o_ts_apply">—</div></div>
+  </div>
+
+  <div class="row-actions">
+    <button type="button" class="act" id="btn_ts_pdf">PDF 다운로드</button>
+    <button type="button" class="act ghost" id="btn_reset_ts">입력 초기화</button>
+  </div>
+</section>
 </main>
+<div id="ts_print_area" style="display:none"></div>
 
 <footer class="foot">
   <span>사내 등급화 26.07 · 재무 25년말 · 낙찰률 23.05 배포분 · 물건종류 26.09.11 확정</span>
@@ -460,6 +549,17 @@ const BUILD='2026-09-11.17';
 const $=id=>document.getElementById(id);
 const W=n=>n==null||isNaN(n)?'—':Math.round(n).toLocaleString('ko-KR');
 const num=s=>{const d=String(s==null?'':s).replace(/[^0-9.-]/g,'');return d===''?null:Number(d)};
+function formatEok(n){
+  // 억/천만원 단위로 보기 좋게 표시 (예: 450000000 -> "4억 5,000만원")
+  if(!n)return'—';
+  const eok=Math.floor(n/100000000);
+  const man=Math.round((n%100000000)/10000);
+  let s='';
+  if(eok)s+=eok+'억';
+  if(man)s+=(s?' ':'')+man.toLocaleString('ko-KR')+'만원';
+  if(!eok&&!man)s=W(n)+'원';
+  return s;
+}
 const digits=s=>String(s==null?'':s).replace(/\D/g,'');
 /* 주문서의 한글 금액 표기를 숫자로: "일 억" → 100000000, "삼억오천만" → 350000000 */
 const KO={'영':0,'일':1,'이':2,'삼':3,'사':4,'오':5,'육':6,'칠':7,'팔':8,'구':9};
@@ -505,6 +605,19 @@ $('dl_reg').innerHTML=Object.keys(DATA.regions).map(r=>'<option value="'+r+'"></
 $('i_type').innerHTML=DATA.types.map(t=>'<option>'+t+'</option>').join('');
 const dt=['— 직접 선택 —'].concat(Object.keys(DATA.bldg).map(k=>'건물: '+k)).concat(Object.keys(DATA.land).map(k=>'지목: '+k));
 $('i_deungi_type').innerHTML=dt.map(t=>'<option>'+t+'</option>').join('');
+
+/* ── 레미콘 단가표 (100% 기준 · 굵은골재 최대치수 25mm · 서울·경기·인천 · 2026.04.01 적용 · 원/㎥ · VAT별도) ── */
+const TS_PRICE_TABLE={
+  80:  {'13.5':84560,'15':86330,'16':87840,'18':95880,'21':97800,'24':102230,'27':106020,'30':111390,'33':113940,'35':116260,'38':125000,'40':130840},
+  120: {'13.5':85950,'15':87840,'16':89610,'18':97550,'21':100330,'24':105070,'27':109180,'30':114240,'33':116850,'35':119040,'38':127790,'40':133630},
+  150: {'13.5':86830,'15':89230,'16':91130,'18':98540,'21':102380,'24':106970,'27':111710,'30':116920,'33':119590,'35':121430,'38':130430,'40':136430},
+  180: {'13.5':87970,'15':90750,'16':92390,'18':100040,'21':103640,'24':109020,'27':114070,'30':119440,'33':122190,'35':123660,'38':133610,'40':140250},
+  210: {'13.5':88980,'15':91510,'16':93410,'18':101530,'21':105700,'24':111230,'27':116760,'30':122140,'33':124940,'35':126470,'38':137950,'40':145610}
+};
+const TS_STRENGTHS=['13.5','15','16','18','21','24','27','30','33','35','38','40'];
+const TS_SLUMPS=Object.keys(TS_PRICE_TABLE);
+$('i_ts_strength').innerHTML=TS_STRENGTHS.map(s=>'<option value="'+s+'"'+(s==='21'?' selected':'')+'>'+s+'</option>').join('');
+$('i_ts_slump').innerHTML=TS_SLUMPS.map(s=>'<option value="'+s+'"'+(s==='150'?' selected':'')+'>'+s+'</option>').join('');
 
 /* ── 단계 이동 ── */
 const rail=[...document.querySelectorAll('.rail button')];
@@ -776,12 +889,18 @@ function renderSummary(){
 
 /* ── 로컬 임시저장 (이 브라우저에만) ── */
 const IDS=['i_code','i_pay','i_name','i_ceo','i_site','i_gr','i_grrel','i_grmax','i_gr2','i_grrel2','i_grmax2','i_gubun','i_type',
- 'i_region','i_addr','i_owner','i_gap','i_rtms','j_no','j_co','j_kind','j_insured','j_us','j_co_n','j_from','j_to','j_amt'];
+ 'i_region','i_addr','i_owner','i_gap','i_rtms','j_no','j_co','j_kind','j_insured','j_us','j_co_n','j_from','j_to','j_amt',
+ 'i_ts_start','i_ts_end','i_ts_days','i_ts_strength','i_ts_slump','i_ts_discount','i_ts_roundunit'];
 function save(){
   try{const o={};IDS.forEach(k=>o[k]=$(k).value);
     o._eul=[...$('eul_tbl').querySelectorAll('tbody tr')].map(tr=>({
       no:tr.querySelector('.e-no').value,kind:tr.querySelector('.e-kind').value,
       who:tr.querySelector('.e-who').value,amt:tr.querySelector('.e-amt').value,x:tr.querySelector('.e-x').checked}));
+    o._ts=[...$('ts_tbl').querySelectorAll('tbody tr')].map(tr=>{
+      const d={site:tr.querySelector('.ts-site').value,note:tr.querySelector('.ts-note').value};
+      tr.querySelectorAll('.ts-m').forEach(inp=>{d[inp.dataset.ym]=inp.value});
+      return d;
+    });
     o._b=BUILD;
     localStorage.setItem('yeosin.v4',JSON.stringify(o));}catch(e){}
 }
@@ -790,7 +909,11 @@ function load(){
     if(o._b!==BUILD)return false;
     IDS.forEach(k=>{if(o[k]!=null)$(k).value=o[k]});
     $('eul_tbl').querySelector('tbody').innerHTML='';
-    (o._eul||[]).forEach(d=>eulRow(d)); return true;}catch(e){return false}
+    (o._eul||[]).forEach(d=>eulRow(d));
+    renderTSHead();
+    $('ts_tbl').querySelector('tbody').innerHTML='';
+    (o._ts||[]).forEach(d=>tsRow(d));
+    return true;}catch(e){return false}
 }
 
 /* ── 초기 상태: 초당산업 예시 ── */
@@ -799,6 +922,14 @@ function seed(){
   eulRow({no:'1',kind:'근저당권설정',who:'(주)우리은행',amt:'66,000,000',x:true});
   eulRow({no:'3',kind:'근저당권설정',who:'(주)우리은행',amt:'108,000,000',x:true});
   eulRow({no:'4-1',kind:'근저당권변경',who:'(주)우리은행',amt:'48,600,000',x:false});
+  if(!$('i_ts_start').value){const t=new Date();$('i_ts_start').value=t.getFullYear()+'-'+String(t.getMonth()+1).padStart(2,'0');}
+  if(!$('i_ts_days').value)$('i_ts_days').value='35';
+  renderTSHead();
+  $('ts_tbl').querySelector('tbody').innerHTML='';
+  const months=getMonthList();
+  const ex={site:'전현장'};
+  [1800,2100,1950].forEach((v,i)=>{if(months[i])ex[months[i].key]=String(v)}); // 예시 타설량(㎥)
+  tsRow(ex);
 }
 function fill(o){Object.keys(o).forEach(k=>{if($(k))$(k).value=o[k]})}
 $('btn_ex_new').addEventListener('click',()=>{
@@ -971,6 +1102,215 @@ $('i_name').addEventListener('change',()=>{lookupSilent();save()});
   if($(id))$(id).addEventListener('input',()=>{
     if(id==='i_gr'||id==='i_gr2')grSt(!!($('f_order').files&&$('f_order').files[0]));
     renderSummary();save()})});
+
+/* ── STEP 6 : 타설계획 (월별 칸은 백만원 단위 입력) ──
+   타설기간(시작~종료 연월)으로 실제 개월 수만큼 월 컬럼을 동적 생성한다.
+   각 월 컬럼은 실제 연월 문자열("YYYY-MM")을 키로 써서, 기간을 나중에 바꿔도
+   이미 입력한 값이 해당 달에 그대로 남아있도록 한다(순서 인덱스가 아니라 연월로 매칭). */
+function getMonthList(){
+  const start=$('i_ts_start').value, end=$('i_ts_end').value;
+  const validStart=/^\d{4}-\d{2}$/.test(start||'');
+  if(!validStart){
+    // 타설기간 미입력: 자리표시자 9칸
+    return Array.from({length:9},(_,i)=>({key:'x'+i,label:'00월',days:30}));
+  }
+  let [sy,sm]=start.split('-').map(Number);
+  let count=9;
+  if(/^\d{4}-\d{2}$/.test(end||'')){
+    const [ey,em]=end.split('-').map(Number);
+    const diff=(ey-sy)*12+(em-sm)+1;
+    if(diff>=1)count=Math.min(diff,36); // 폭주 방지용 상한
+  }
+  const list=[]; let y=sy,m=sm;
+  for(let i=0;i<count;i++){
+    list.push({key:y+'-'+String(m).padStart(2,'0'),label:y+'.'+String(m).padStart(2,'0'),days:new Date(y,m,0).getDate()});
+    m++; if(m>12){m=1;y++;}
+  }
+  return list;
+}
+function renderTSHead(){
+  const months=getMonthList();
+  $('ts_thead_row').innerHTML='<th>현장명</th>'+
+    months.map(m=>'<th class="n">'+m.label+'</th>').join('')+
+    '<th>비고</th><th class="n">합계(㎥)</th><th class="n">매출채권(원)</th><th></th>';
+}
+function rebuildTSRows(){
+  // 기존 행 값을 연월 키로 보존한 채, 바뀐 기간에 맞춰 표를 다시 그린다.
+  const old=[...$('ts_tbl').querySelectorAll('tbody tr')].map(tr=>{
+    const vals={}; tr.querySelectorAll('.ts-m').forEach(inp=>{vals[inp.dataset.ym]=inp.value});
+    return {site:tr.querySelector('.ts-site').value,note:tr.querySelector('.ts-note').value,vals};
+  });
+  $('ts_tbl').querySelector('tbody').innerHTML='';
+  const months=getMonthList();
+  old.forEach(r=>{
+    const d={site:r.site,note:r.note};
+    months.forEach(m=>{if(r.vals[m.key])d[m.key]=r.vals[m.key]});
+    tsRow(d);
+  });
+}
+function tsRow(d){
+  d=d||{};
+  const months=getMonthList();
+  const tr=document.createElement('tr');
+  const monthTds=months.map(m=>
+    '<td class="n">'+
+      '<input type="text" class="ts-m num" data-ym="'+m.key+'" value="'+(d[m.key]||'')+'">'+
+      '<div class="ts-m-amt muted mono" style="font-size:10px;margin-top:2px;text-align:right">—</div>'+
+      '<div class="ts-m-loan mono" style="font-size:10px;margin-top:1px;text-align:right;color:var(--accent)">—</div>'+
+    '</td>').join('');
+  tr.innerHTML='<td><input type="text" class="ts-site" value="'+(d.site||'')+'" placeholder="현장명">'+
+      '<div class="muted mono" style="font-size:10px;margin-top:2px">매출채권</div>'+
+      '<div class="mono" style="font-size:10px;margin-top:1px;color:var(--accent)">월중여신</div></td>'+
+    monthTds+
+    '<td><input type="text" class="ts-note" value="'+(d.note||'')+'"></td>'+
+    '<td class="n ts-sum">—</td>'+
+    '<td class="n ts-amt">—</td>'+
+    '<td><button type="button" class="act ghost ts-del" style="padding:3px 8px;font-size:11px">삭제</button></td>';
+  tr.querySelector('.ts-del').addEventListener('click',()=>{tr.remove();calcTS();save()});
+  tr.querySelectorAll('input').forEach(el=>el.addEventListener('input',()=>{calcTS();save()}));
+  $('ts_tbl').querySelector('tbody').appendChild(tr);
+  return tr;
+}
+function calcTS(){
+  const months=getMonthList();
+
+  // 기준단가 = 단가표[슬럼프][강도] (100% 단가), 적용단가 = 기준단가 x 할인율
+  const slump=$('i_ts_slump').value, strength=$('i_ts_strength').value;
+  const basePrice=(TS_PRICE_TABLE[slump]&&TS_PRICE_TABLE[slump][strength])||0;
+  $('o_ts_baseprice').value=basePrice?basePrice.toLocaleString('ko-KR'):'';
+  const discountRaw=num($('i_ts_discount').value);
+  const discount=discountRaw==null?100:discountRaw;
+  const price=Math.floor(basePrice*(discount/100)/100)*100; // 백원 단위만 남기고 절사
+  $('o_ts_price').value=price?price.toLocaleString('ko-KR'):'';
+  const days=num($('i_ts_days').value); // 대금결제조건 경과일수 (월말청구 + N일 현금)
+
+  let globalPeakLoan=0; // 전 현장 통틀어 가장 높은 월중여신 (신청여신 산출 기준)
+  [...$('ts_tbl').querySelectorAll('tbody tr')].forEach(tr=>{
+    let sum=0;
+    const amtByYm={};
+    tr.querySelectorAll('.ts-m').forEach(inp=>{
+      const v=num(inp.value)||0; // ㎥
+      const ym=inp.dataset.ym;
+      sum+=v;
+      // 월별 매출채권 = 그 달 타설량 x 적용단가 (칸 아래에 바로 표시)
+      const monthAmt=v*price;
+      amtByYm[ym]=monthAmt;
+      const amtEl=inp.parentElement.querySelector('.ts-m-amt');
+      if(amtEl)amtEl.textContent=v?W(monthAmt):'—';
+    });
+    tr.querySelector('.ts-sum').textContent=sum?W(sum):'—';
+    tr.querySelector('.ts-amt').textContent=sum?W(sum*price):'—';
+
+    // 월중여신(그 달) = 그 달을 포함해 최근 N개월치 매출채권의 합
+    // (달력상 정확한 날짜 계산 대신 "개월 수" 고정폭으로 계산 — 31일짜리 달 때문에
+    //  회수일이 다다음달로 밀려 어쩌다 3개월치가 겹치는 등의 캘린더 흔들림을 없앤다.
+    //  예) 30일 조건이면 항상 최근 2개월치, 60일이면 항상 최근 3개월치)
+    if(days!=null){
+      const windowSize=Math.ceil(days/30)+1; // 30일→2개월, 60일→3개월
+      const rowLoanByYm={};
+      months.forEach((m,i)=>{
+        let loanSum=0;
+        for(let j=Math.max(0,i-windowSize+1);j<=i;j++){
+          loanSum+=amtByYm[months[j].key]||0;
+        }
+        rowLoanByYm[m.key]=loanSum;
+      });
+      // 그 현장의 최고 월중여신 달을 진한 빨간색으로 강조
+      let peakYm=null,peakVal=0;
+      Object.keys(rowLoanByYm).forEach(ym=>{if(rowLoanByYm[ym]>peakVal){peakVal=rowLoanByYm[ym];peakYm=ym}});
+      if(peakVal>globalPeakLoan)globalPeakLoan=peakVal;
+      months.forEach(m=>{
+        const inp=tr.querySelector('.ts-m[data-ym="'+m.key+'"]');
+        const loanEl=inp&&inp.parentElement.querySelector('.ts-m-loan');
+        if(!loanEl)return;
+        const v=rowLoanByYm[m.key];
+        loanEl.textContent=v?W(v):'—';
+        const isPeak=peakYm&&m.key===peakYm&&peakVal>0;
+        loanEl.style.color=isPeak?'var(--crit-ink)':'var(--accent)';
+        loanEl.style.fontWeight=isPeak?'700':'400';
+      });
+    } else {
+      tr.querySelectorAll('.ts-m-loan').forEach(el=>el.textContent='—');
+    }
+  });
+
+  // 신청여신 = (전 현장 최고 월중여신 + 선택한 단위)를 천만원 단위로 절사
+  // 예: 피크 157,800,000 + 1억원 = 257,800,000 -> 천만원 절사 -> 250,000,000(2억5천)
+  const applyUnit=num($('i_ts_roundunit').value)||50000000;
+  const applyLoan=globalPeakLoan?Math.floor((globalPeakLoan+applyUnit)/10000000)*10000000:0;
+  $('o_ts_apply').textContent=applyLoan?formatEok(applyLoan):'—';
+
+  $('ts_paycond_display').textContent=days!=null?('[대금결제조건 : 월말청구 '+days+'일 현금]'):'[대금결제조건 : 월말청구 OO일 현금]';
+
+  let f='';
+  if(days==null)
+    f+='<div class="warnbox"><b>여신 경과일수가 입력되지 않았습니다.</b> 대금결제조건의 일수를 입력하십시오.</div>';
+  if(!basePrice)
+    f+='<div class="warnbox"><b>단가표에서 해당 강도·슬럼프 조합을 찾지 못했습니다.</b> 다른 값을 선택하십시오.</div>';
+  $('ts_flag').innerHTML=f;
+}
+function buildTSPrintHTML(){
+  const months=getMonthList();
+  const strength=$('i_ts_strength').value, slump=$('i_ts_slump').value;
+  const price=$('o_ts_price').value||'—';
+  const discount=$('i_ts_discount').value||'100';
+  const days=$('i_ts_days').value;
+  const unitLabel={'10000000':'천만원','50000000':'5천만원','100000000':'1억원'}[$('i_ts_roundunit').value]||'';
+  const today=new Date().toISOString().slice(0,10);
+
+  const monthHead=months.map(m=>'<th>'+m.label+'</th>').join('');
+  const rowsHtml=[...$('ts_tbl').querySelectorAll('tbody tr')].map(tr=>{
+    const site=tr.querySelector('.ts-site').value||'—';
+    const note=tr.querySelector('.ts-note').value||'';
+    const sum=tr.querySelector('.ts-sum').textContent;
+    const amt=tr.querySelector('.ts-amt').textContent;
+    const vols=[],amts=[],loans=[];
+    months.forEach(m=>{
+      const inp=tr.querySelector('.ts-m[data-ym="'+m.key+'"]');
+      const amtEl=inp&&inp.parentElement.querySelector('.ts-m-amt');
+      const loanEl=inp&&inp.parentElement.querySelector('.ts-m-loan');
+      const loanColor=loanEl&&loanEl.style.color==='var(--crit-ink)'?'#a4241a':'#333';
+      vols.push('<td>'+(inp&&inp.value?inp.value+'㎥':'—')+'</td>');
+      amts.push('<td>'+(amtEl?amtEl.textContent:'—')+'</td>');
+      loans.push('<td style="color:'+loanColor+'">'+(loanEl?loanEl.textContent:'—')+'</td>');
+    });
+    const sumLabel=sum==='—'?sum:sum+'㎥';
+    const amtLabel=amt==='—'?amt:amt+'원';
+    return ''+
+      '<tr><td class="pr-site" rowspan="3">'+site+'</td><td class="pr-rowlabel">타설량(㎥)</td>'+vols.join('')+
+        '<td rowspan="3">'+(note||'—')+'</td><td>'+sumLabel+'</td></tr>'+
+      '<tr><td class="pr-rowlabel">매출채권(원)</td>'+amts.join('')+'<td>'+amtLabel+'</td></tr>'+
+      '<tr><td class="pr-rowlabel pr-loan">월중여신(원)</td>'+loans.join('')+'<td></td></tr>';
+  }).join('');
+
+  return ''+
+    '<h1>타설계획 보고서</h1>'+
+    '<p class="pr-sub">작성일: '+today+'</p>'+
+    '<p class="pr-cond">'+
+      '타설기간: '+($('i_ts_start').value||'—')+' ~ '+($('i_ts_end').value||'미지정')+'<br>'+
+      '대금결제조건: 월말청구 '+(days||'—')+'일 현금<br>'+
+      '단가: 호칭강도 '+strength+'MPa · 슬럼프 '+slump+'mm · 기준단가 '+$('o_ts_baseprice').value+'원 · 할인율 '+discount+'% · 적용단가 '+price+'원'+
+    '</p>'+
+    '<table><thead><tr>'+
+      '<th>현장명</th><th>구분</th>'+monthHead+'<th>비고</th><th>합계</th>'+
+    '</tr></thead><tbody>'+rowsHtml+'</tbody></table>'+
+    '<p class="pr-total">신청여신 ('+unitLabel+' 절상): '+$('o_ts_apply').textContent+'</p>';
+}
+function printTS(){
+  $('ts_print_area').innerHTML=buildTSPrintHTML();
+  window.print();
+}
+$('btn_ts_pdf').addEventListener('click',printTS);
+$('btn_add_ts').addEventListener('click',()=>{tsRow();calcTS();save()});
+$('btn_reset_ts').addEventListener('click',resetAll);
+['i_ts_start','i_ts_end'].forEach(id=>{
+  $(id).addEventListener('input',()=>{renderTSHead();rebuildTSRows();calcTS();save()});
+});
+['i_ts_days','i_ts_strength','i_ts_slump','i_ts_discount','i_ts_roundunit'].forEach(id=>{
+  $(id).addEventListener('input',()=>{calcTS();save()});
+  $(id).addEventListener('change',()=>{calcTS();save()});
+});
+renderTSHead(); calcTS();
 })();
 </script>
 
