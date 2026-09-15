@@ -1,0 +1,152 @@
+/* ══════════════════════════════════════════════════════════════
+   credit.css — 신용거래 심사 페이지 고유 레이아웃
+
+   버튼·카드·입력·배지·표·타이포는 전부 components.css 가 담당한다.
+   여기 남은 것은 이 페이지에만 있는 두 덩어리뿐:
+     ① 채점표(.sheet) — 11행 × [번호 / 항목 / A~E 선택 / 배점] 그리드
+     ② 판독 로그(.uplog) — 업로드한 보고서에서 뽑은 값 목록
+   ══════════════════════════════════════════════════════════════ */
+
+/* ── 채점표 + 점수 패널 2단 ── */
+.scorer{
+  display:grid;
+  grid-template-columns:minmax(0,1fr) 300px;
+  gap:var(--sp-xl);
+  align-items:start;
+}
+@media (max-width:900px){ .scorer{ grid-template-columns:1fr } }
+
+/* ── ① 채점표 ── */
+.sheet{ min-width:0 }
+
+.sheet__row{
+  display:grid;
+  grid-template-columns:32px minmax(0,1.1fr) minmax(0,2.4fr) 56px;
+  gap:var(--sp-md);
+  align-items:center;
+  padding:var(--sp-md) var(--sp-lg);
+  border-bottom:1px solid var(--hairline);
+}
+.sheet__row:last-child{ border-bottom:0 }
+
+.sheet__row--head{ background:var(--canvas-soft); padding-block:var(--sp-sm) }
+.sheet__row--head span{
+  font-family:var(--font-mono);
+  font-size:var(--t-caption-sm);
+  line-height:1.33;
+  letter-spacing:var(--track-mono-sm);
+  text-transform:uppercase;
+  color:var(--body-mid);
+}
+
+.sheet__no{
+  font-family:var(--font-mono); font-variant-numeric:tabular-nums;
+  font-size:var(--t-caption-sm); color:var(--mute);
+}
+.sheet__item{ min-width:0 }
+.sheet__name{ font-size:var(--t-body-sm); line-height:1.35; color:var(--ink) }
+.sheet__weight{
+  margin-top:var(--sp-xxs);
+  font-family:var(--font-mono); font-size:var(--t-caption-sm);
+  letter-spacing:var(--track-mono-sm); color:var(--mute);
+}
+.sheet__pts{
+  font-family:var(--font-mono); font-variant-numeric:tabular-nums;
+  font-size:var(--t-body-md); text-align:right; color:var(--ink);
+}
+.sheet__pts.is-empty{ color:var(--mute) }
+
+.sheet__row--total{ background:var(--canvas-soft); border-top:1px solid var(--hairline) }
+
+@media (max-width:700px){
+  .sheet__row{ grid-template-columns:32px minmax(0,1fr) 56px; row-gap:var(--sp-md) }
+  .sheet__row .segmented{ grid-column:1 / -1 }
+  .sheet__row--head{ display:none }
+}
+
+/* ── 점수 패널 (sticky) ── */
+.score-panel{ position:sticky; top:calc(var(--header-h) + var(--sp-lg)) }
+.score-panel__score{
+  display:flex; align-items:baseline; gap:var(--sp-sm);
+  margin-top:var(--sp-md);
+  font-family:var(--font-mono); font-variant-numeric:tabular-nums;
+  font-size:var(--t-display-md); line-height:1;
+  letter-spacing:var(--track-display);
+  color:var(--ink);
+}
+.score-panel__score small{
+  font-size:var(--t-body-md); letter-spacing:0; color:var(--mute);
+}
+/* 판정 — 시맨틱 3색이 붙는 유일한 자리 */
+.verdict{
+  display:block; width:100%;
+  margin-top:var(--sp-lg); padding:var(--sp-md);
+  border:1px solid var(--hairline); border-radius:var(--r-pill);
+  background:transparent;
+  font-family:var(--font-mono); font-size:var(--t-caption-sm);
+  line-height:1.33; letter-spacing:var(--track-mono-sm);
+  text-transform:uppercase; text-align:center; color:var(--mute);
+}
+.verdict--ok  { color:var(--sem-ok);   border-color:var(--sem-ok-line);   background:var(--sem-ok-wash) }
+.verdict--crit{ color:var(--sem-crit); border-color:var(--sem-crit-line); background:var(--sem-crit-wash) }
+.verdict--hold{ color:var(--sem-warn); border-color:var(--sem-warn-line); background:var(--sem-warn-wash) }
+
+/* ── ② 판독 로그 ── */
+.uplog__head{
+  display:flex; align-items:center; gap:var(--sp-md); flex-wrap:wrap;
+  padding:var(--sp-md) var(--sp-lg);
+  background:var(--canvas-soft);
+  border-bottom:1px solid var(--hairline);
+}
+.uplog__co{ font-size:var(--t-body-md); color:var(--ink) }
+.uplog__meta{
+  flex:1; min-width:0;
+  font-family:var(--font-mono); font-size:var(--t-caption-sm);
+  color:var(--mute); overflow-wrap:anywhere;
+}
+
+.uplog__row{
+  display:grid;
+  grid-template-columns:28px minmax(0,1.1fr) minmax(0,1.3fr) 54px 96px;
+  gap:var(--sp-md);
+  align-items:center;
+  padding:var(--sp-sm) var(--sp-lg);
+  border-bottom:1px solid var(--hairline);
+  font-size:var(--t-body-sm);
+}
+.uplog__row:last-child{ border-bottom:0 }
+.uplog__k{ font-family:var(--font-mono); font-variant-numeric:tabular-nums; color:var(--mute) }
+.uplog__name{ color:var(--body); min-width:0; overflow-wrap:anywhere }
+.uplog__val{ font-family:var(--font-mono); color:var(--ink); overflow-wrap:anywhere }
+.uplog__src{
+  font-family:var(--font-mono); font-size:var(--t-caption-sm);
+  letter-spacing:var(--track-mono-sm); color:var(--mute); text-align:right;
+}
+.uplog__row.is-pending .uplog__val,
+.uplog__row.is-pending .uplog__name{ color:var(--sem-warn) }
+.uplog__row--sum{ background:var(--canvas-soft); border-bottom:0 }
+
+.uplog__err{ padding:var(--sp-lg); color:var(--sem-crit); font-size:var(--t-body-sm); line-height:1.6 }
+
+/* 게이지 판독 결과 확인 — 보고서 그림 + 담당자 정정 입력 */
+.confirm{ display:inline-flex; align-items:center; gap:var(--sp-sm); flex-wrap:wrap }
+.confirm__img{
+  height:52px; border:1px solid var(--hairline); border-radius:var(--r-sm);
+  background:#fff; display:block;
+}
+.confirm__msg{ font-family:var(--font-sans); font-size:var(--t-caption-sm); color:var(--sem-warn) }
+.confirm__ok{ font-family:var(--font-mono); font-size:var(--t-caption-sm); color:var(--ink) }
+.confirm__input{
+  width:11ch; padding:var(--sp-xxs) var(--sp-sm);
+  background:var(--canvas-soft);
+  border:1px solid var(--sem-warn-line); border-radius:var(--r-sm);
+  color:var(--ink);
+  font-family:var(--font-mono); font-size:var(--t-caption-sm);
+}
+.confirm__input.is-bad{ border-color:var(--sem-crit) }
+
+@media (max-width:760px){
+  .uplog__row{ grid-template-columns:28px minmax(0,1fr) 54px; row-gap:var(--sp-xs) }
+  .uplog__val{ grid-column:2 / -1 }
+  .uplog__src{ grid-column:2 / -1; text-align:left }
+}

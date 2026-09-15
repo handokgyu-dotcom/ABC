@@ -1,0 +1,523 @@
+/* ══════════════════════════════════════════════════════════════
+   components.css — 두 페이지가 공유하는 컴포넌트
+   토큰(tokens.css)만 참조한다. 하드코딩된 색·크기를 두지 않는다.
+
+   여기 있는 것 = 신용/연대보증 양쪽에서 쓰이거나, 디자인 시스템의
+   기본 요소인 것. 한쪽에서만 쓰이는 레이아웃은 각 페이지 CSS에 둔다.
+   ══════════════════════════════════════════════════════════════ */
+
+/* ═══════════════════════ 레이아웃 ═══════════════════════ */
+
+.container{
+  width:100%;
+  max-width:var(--container);
+  margin-inline:auto;
+  padding-inline:var(--sp-xl);
+}
+
+/* 문서의 hero-band / content-band. 세로 리듬을 이 하나로 통일한다. */
+.band{ padding-block:var(--sp-4xl) }
+.band--tight{ padding-block:var(--sp-2xl) }
+.band + .band{ border-top:1px solid var(--hairline) }
+
+.divider{ height:1px; background:var(--hairline); border:0; margin:0 }
+
+/* 가로 묶음 — 줄바꿈되는 버튼/칩 그룹 */
+.cluster{ display:flex; flex-wrap:wrap; gap:var(--sp-sm); align-items:center }
+
+/* 반응형 그리드 — 카드/필드 양쪽에서 쓴다 */
+.grid{ display:grid; gap:var(--sp-lg); grid-template-columns:repeat(auto-fit,minmax(220px,1fr)) }
+.grid--wide{ grid-template-columns:repeat(auto-fit,minmax(290px,1fr)) }
+
+/* ═══════════════════════ 타이포 ═══════════════════════ */
+
+.display-xl{ font-size:var(--t-display-xl); line-height:1;    letter-spacing:var(--track-display); text-wrap:balance }
+.display-lg{ font-size:var(--t-display-lg); line-height:1;    letter-spacing:var(--track-display); text-wrap:balance }
+.display-md{ font-size:var(--t-display-md); line-height:1.04; letter-spacing:var(--track-display); text-wrap:balance }
+.display-sm{ font-size:var(--t-display-sm); line-height:1.14; letter-spacing:var(--track-display-sm); text-wrap:balance }
+.display-xs{ font-size:var(--t-display-xs); line-height:1.4 }
+
+.body-lg{ font-size:var(--t-body-lg); line-height:1.56 }
+.body-md{ font-size:var(--t-body-md); line-height:1.5 }
+.body-sm{ font-size:var(--t-body-sm); line-height:1.43 }
+
+.lede{ font-size:var(--t-body-lg); line-height:1.56; color:var(--body); max-width:62ch }
+.muted{ color:var(--mute) }
+.dim{ color:var(--body) }
+
+/* 이 시스템의 서명 — 모든 섹션 제목 위에 붙는 모노 대문자 라벨 */
+.eyebrow{
+  font-family:var(--font-mono);
+  font-size:var(--t-caption);
+  line-height:1.43;
+  letter-spacing:var(--track-mono);
+  text-transform:uppercase;
+  color:var(--ink);
+}
+.eyebrow--sm{ font-size:var(--t-caption-sm); line-height:1.33; letter-spacing:var(--track-mono-sm) }
+.eyebrow--mute{ color:var(--mute) }
+
+/* 숫자는 항상 모노 + 등폭 숫자 — 표에서 자릿수가 흔들리지 않게 */
+.mono{ font-family:var(--font-mono); font-variant-numeric:tabular-nums }
+.num{ font-family:var(--font-mono); font-variant-numeric:tabular-nums; text-align:right }
+
+/* ═══════════════════════ 버튼 ═══════════════════════
+   문서: 모든 인터랙티브 요소는 필(9999px). 아웃라인이 기본이고
+   흰색 채움은 드문 예외다. 앱이라 섹션당 주요 동작 1개에만 --primary
+   를 쓰고 나머지는 전부 아웃라인으로 둔다. */
+
+.btn{
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  gap:var(--sp-sm);
+  padding:var(--sp-sm) var(--sp-lg);
+  border:1px solid var(--pill-border);
+  border-radius:var(--r-pill);
+  background:transparent;
+  color:var(--ink);
+  font-family:var(--font-sans);
+  font-size:var(--t-body-sm);
+  font-weight:var(--w-regular);
+  line-height:1.43;
+  white-space:nowrap;
+  cursor:pointer;
+  transition:border-color .15s, background-color .15s, color .15s;
+}
+.btn:hover:not(:disabled){ border-color:var(--pill-border-hover); background:var(--canvas-soft) }
+.btn:disabled{ opacity:.4; cursor:not-allowed }
+
+/* 흰색 채움 — 폴러리티 반전 */
+.btn--primary{ background:var(--primary); border-color:var(--primary); color:var(--on-primary) }
+.btn--primary:hover:not(:disabled){ background:var(--ink-hover); border-color:var(--ink-hover); color:var(--on-primary) }
+
+/* 아웃라인은 .btn 기본값과 같다. 의도를 드러내고 싶을 때 명시적으로 쓴다. */
+.btn--outline{ background:transparent; border-color:var(--pill-border); color:var(--ink) }
+
+.btn--sm{ padding:var(--sp-xs) var(--sp-md); font-size:var(--t-caption-sm) }
+.btn--block{ width:100% }
+
+/* 모바일 터치 타깃 — 문서의 WCAG 44px 요구 */
+@media (max-width:767px){
+  .btn{ min-height:44px }
+  .btn--sm{ min-height:36px }
+}
+
+/* ═══════════════════════ 카드 ═══════════════════════
+   문서: 그림자 없음. 헤어라인이 모든 입체감을 담당한다. */
+
+.card{
+  background:var(--canvas-card);
+  border:1px solid var(--hairline);
+  border-radius:var(--r-sm);
+  padding:var(--sp-xl);
+}
+.card--soft{ background:var(--canvas-soft) }
+.card--flush{ padding:0; overflow:hidden }   /* 표를 끝까지 채울 때 */
+
+/* 카드 머리 — 모노 라벨 + 설명 + 우측 상태 */
+.card__head{
+  display:flex;
+  align-items:center;
+  gap:var(--sp-md);
+  flex-wrap:wrap;
+  margin-bottom:var(--sp-lg);
+}
+.card__head > .eyebrow{ flex:none }
+.card__head > .hint{ color:var(--mute); font-size:var(--t-body-sm); line-height:1.43 }
+.card__head > .status{ margin-left:auto }
+
+/* ═══════════════════════ 폼 ═══════════════════════ */
+
+.field{ display:flex; flex-direction:column; gap:var(--sp-sm); min-width:0 }
+.field__label{
+  font-family:var(--font-mono);
+  font-size:var(--t-caption-sm);
+  line-height:1.33;
+  letter-spacing:var(--track-mono-sm);
+  text-transform:uppercase;
+  color:var(--body-mid);
+}
+/* 라벨 안의 부연 — 원본의 <em> 자리 */
+.field__label em{ font-style:normal; text-transform:none; letter-spacing:0; color:var(--mute) }
+.field__hint{ font-size:var(--t-caption-sm); line-height:1.4; color:var(--mute) }
+
+.input,.select,.textarea{
+  width:100%;
+  padding:var(--sp-md) var(--sp-lg);
+  background:var(--canvas-soft);
+  border:1px solid var(--hairline);
+  border-radius:var(--r-sm);
+  color:var(--ink);
+  font-family:var(--font-sans);
+  font-size:var(--t-body-md);
+  line-height:1.5;
+  transition:border-color .15s;
+}
+.input:hover,.select:hover,.textarea:hover{ border-color:var(--canvas-mid) }
+.input:focus,.select:focus,.textarea:focus{ border-color:var(--pill-border-hover) }
+.input::placeholder,.textarea::placeholder{ color:var(--mute) }
+.input[readonly]{ color:var(--body) }
+.textarea{ resize:vertical }
+
+/* 입력칸 바탕은 문맥에 따라 달라져야 한다.
+   문서가 정한 text-input 바탕 canvas-soft(#1a1c20)는 페이지 캔버스(#0a0a0a)
+   위에서는 잘 보이지만, 카드(canvas-card #191919) 안에서는 값이 거의 같아
+   입력칸이 통째로 사라진다. 카드 안에서는 캔버스색으로 되돌려 "파인 우물"로
+   읽히게 한다. */
+.card .input, .card .select, .card .textarea,
+.card .filefield, .card .dropzone,
+.step-panel .input, .step-panel .select, .step-panel .textarea,
+.step-panel .filefield, .step-panel .dropzone{ background:var(--canvas) }
+
+/* 숫자 입력 — 모노·우측정렬·등폭 */
+.input--num{ font-family:var(--font-mono); font-variant-numeric:tabular-nums; text-align:right }
+/* 표 안에서는 촘촘하게 */
+.input--tight{ padding:var(--sp-sm) var(--sp-md); font-size:var(--t-body-sm); border-radius:var(--r-sm) }
+
+/* 작은 파일 선택 필드 */
+.filefield{
+  display:flex; flex-direction:column; gap:var(--sp-sm);
+  padding:var(--sp-lg);
+  background:var(--canvas-soft);
+  border:1px dashed var(--canvas-mid);
+  border-radius:var(--r-sm);
+}
+.filefield input[type=file]{
+  font-family:var(--font-mono);
+  font-size:var(--t-caption-sm);
+  color:var(--body);
+}
+.filefield input[type=file]::file-selector-button{
+  margin-right:var(--sp-md);
+  padding:var(--sp-xs) var(--sp-md);
+  background:transparent;
+  border:1px solid var(--pill-border);
+  border-radius:var(--r-pill);
+  color:var(--ink);
+  font-family:var(--font-sans);
+  font-size:var(--t-caption-sm);
+  cursor:pointer;
+}
+.filefield input[type=file]::file-selector-button:hover{ border-color:var(--pill-border-hover); background:var(--canvas-soft) }
+.filefield__got{ font-family:var(--font-mono); font-size:var(--t-caption-sm); color:var(--sem-ok) }
+
+/* 큰 드롭존 */
+.dropzone{
+  display:flex; align-items:center; justify-content:center;
+  min-height:140px;
+  padding:var(--sp-xl);
+  background:var(--canvas-soft);
+  border:1px dashed var(--canvas-mid);
+  border-radius:var(--r-sm);
+  text-align:center;
+  cursor:pointer;
+  transition:border-color .15s, background-color .15s;
+}
+.dropzone:hover,.dropzone:focus-visible,.dropzone.is-over{ border-color:var(--pill-border-hover); background:var(--canvas-card) }
+.dropzone.is-busy{ opacity:.5; cursor:progress }
+.dropzone__title{ font-size:var(--t-body-lg); line-height:1.4 }
+.dropzone__hint{ margin-top:var(--sp-sm); font-size:var(--t-body-sm); color:var(--mute) }
+
+/* ═══════════════════════ 표 ═══════════════════════ */
+
+.table-scroll{ overflow-x:auto; overscroll-behavior-x:contain }
+
+.table{ width:100%; border-collapse:collapse; font-size:var(--t-body-sm) }
+.table th,.table td{
+  padding:var(--sp-md) var(--sp-lg);
+  text-align:left;
+  vertical-align:middle;
+  border-bottom:1px solid var(--hairline);
+}
+.table thead th{
+  background:var(--canvas-soft);
+  font-family:var(--font-mono);
+  font-size:var(--t-caption-sm);
+  font-weight:var(--w-regular);
+  line-height:1.33;
+  letter-spacing:var(--track-mono-sm);
+  text-transform:uppercase;
+  color:var(--body-mid);
+  white-space:nowrap;
+}
+.table td.num,.table th.num{ text-align:right; white-space:nowrap }
+.table tbody tr:last-child td{ border-bottom:0 }
+
+.table--mini th,.table--mini td{ padding:var(--sp-sm) var(--sp-md) }
+.table--top td{ vertical-align:top }
+
+/* ═══════════════════════ 배지 · 상태 ═══════════════════════ */
+
+.badge{
+  display:inline-flex; align-items:center; justify-content:center; gap:var(--sp-xs);
+  padding:var(--sp-xxs) var(--sp-sm);
+  border:1px solid var(--hairline);
+  border-radius:var(--r-pill);
+  background:transparent;
+  font-family:var(--font-mono);
+  font-size:var(--t-caption-sm);
+  line-height:1.33;
+  letter-spacing:var(--track-mono-sm);
+  text-transform:uppercase;
+  color:var(--body-mid);
+  white-space:nowrap;
+}
+.badge--ok  { color:var(--sem-ok);   border-color:var(--sem-ok-line);   background:var(--sem-ok-wash) }
+.badge--warn{ color:var(--sem-warn); border-color:var(--sem-warn-line); background:var(--sem-warn-wash) }
+.badge--crit{ color:var(--sem-crit); border-color:var(--sem-crit-line); background:var(--sem-crit-wash) }
+.badge--solid{ background:var(--primary); border-color:var(--primary); color:var(--on-primary) }
+
+/* 등급 A~E — 모노 대문자 + 헤어라인. 시맨틱 3단계로만 물들인다. */
+.grade{
+  display:inline-flex; align-items:center; justify-content:center;
+  min-width:30px; padding:var(--sp-xxs) var(--sp-sm);
+  border:1px solid var(--hairline);
+  border-radius:var(--r-pill);
+  font-family:var(--font-mono);
+  font-size:var(--t-caption-sm);
+  line-height:1.33;
+  letter-spacing:var(--track-mono-sm);
+  color:var(--body-mid);
+}
+.grade--a{ color:var(--sem-ok);   border-color:var(--sem-ok-line);   background:var(--sem-ok-wash) }
+.grade--b,
+.grade--c{ color:var(--ink);      border-color:var(--pill-border) }
+.grade--d,
+.grade--e{ color:var(--sem-warn); border-color:var(--sem-warn-line); background:var(--sem-warn-wash) }
+.grade--none{ color:var(--mute); border-style:dashed }
+
+/* 비동기 작업 상태 */
+.status{
+  display:inline-flex; align-items:center; gap:var(--sp-sm);
+  font-family:var(--font-mono);
+  font-size:var(--t-caption-sm);
+  line-height:1.33;
+  letter-spacing:var(--track-mono-sm);
+  color:var(--mute);
+  white-space:nowrap;
+}
+.status::before{
+  content:""; width:6px; height:6px; border-radius:var(--r-pill);
+  background:currentColor; flex:none;
+}
+.status--on { color:var(--sem-ok) }
+.status--run{ color:var(--ink) }
+.status--run::before{ animation:pulse 1.2s ease-in-out infinite }
+.status--off{ color:var(--mute) }
+.status:empty{ display:none }
+@keyframes pulse{ 0%,100%{opacity:1} 50%{opacity:.25} }
+
+/* 메타 칩 — 헤더 아래 "기준 PRD v3.2" 같은 라벨 */
+.chip{
+  display:inline-flex; align-items:center; gap:var(--sp-sm);
+  padding:var(--sp-xs) var(--sp-md);
+  border:1px solid var(--hairline);
+  border-radius:var(--r-pill);
+  font-family:var(--font-mono);
+  font-size:var(--t-caption-sm);
+  line-height:1.33;
+  letter-spacing:var(--track-mono-sm);
+  color:var(--body-mid);
+}
+.chip b{ font-weight:var(--w-regular); color:var(--ink) }
+
+/* ═══════════════════════ 안내 박스 ═══════════════════════ */
+
+.callout{
+  padding:var(--sp-md) var(--sp-lg);
+  border:1px solid var(--hairline);
+  border-left-width:2px;
+  border-radius:var(--r-sm);
+  background:var(--canvas-soft);
+  font-size:var(--t-body-sm);
+  line-height:1.5;
+  color:var(--body);
+}
+.callout + .callout{ margin-top:var(--sp-sm) }
+.callout b{ font-weight:var(--w-regular); color:var(--ink) }
+.callout--warn{ border-left-color:var(--sem-warn); background:var(--sem-warn-wash) }
+.callout--crit{ border-left-color:var(--sem-crit); background:var(--sem-crit-wash) }
+.callout--crit b{ color:var(--sem-crit) }
+
+/* ═══════════════════════ 수치 표시 ═══════════════════════ */
+
+.stat-grid{
+  display:grid; gap:1px;
+  grid-template-columns:repeat(auto-fit,minmax(200px,1fr));
+  background:var(--hairline);
+  border:1px solid var(--hairline);
+  border-radius:var(--r-sm);
+  overflow:hidden;
+}
+.stat{ background:var(--canvas-card); padding:var(--sp-lg) var(--sp-xl) }
+.stat__label{
+  font-family:var(--font-mono);
+  font-size:var(--t-caption-sm);
+  line-height:1.33;
+  letter-spacing:var(--track-mono-sm);
+  text-transform:uppercase;
+  color:var(--body-mid);
+}
+.stat__value{
+  margin-top:var(--sp-sm);
+  font-family:var(--font-mono);
+  font-variant-numeric:tabular-nums;
+  font-size:var(--t-display-xs);
+  line-height:1.2;
+  letter-spacing:-.01em;
+  color:var(--ink);
+}
+.stat--hero .stat__value{ font-size:var(--t-display-sm); letter-spacing:var(--track-display-sm) }
+.stat__value small{ font-size:var(--t-caption-sm); color:var(--mute); margin-left:var(--sp-xs) }
+
+/* 진행 막대 */
+.meter{
+  position:relative; height:2px; margin:var(--sp-lg) 0 var(--sp-sm);
+  background:var(--hairline); overflow:visible;
+}
+.meter__fill{ display:block; height:100%; background:var(--primary); transition:width .3s ease }
+.meter__mark{ position:absolute; inset-block:-3px; width:1px; background:var(--body-mid) }
+.meter__scale{
+  display:flex; justify-content:space-between;
+  font-family:var(--font-mono); font-size:var(--t-caption-sm);
+  letter-spacing:var(--track-mono-sm); color:var(--mute);
+}
+
+/* ═══════════════════════ 세그먼티드 컨트롤 ═══════════════════════
+   신용 페이지의 A~E 등급 선택. 필 하나 안에 칸을 나눈 형태. */
+
+.segmented{ display:grid; grid-template-columns:repeat(5,1fr); gap:var(--sp-xs) }
+.segmented button{
+  display:flex; flex-direction:column; align-items:center; justify-content:center; gap:var(--sp-xxs);
+  min-height:46px; padding:var(--sp-sm) var(--sp-xs);
+  border:1px solid var(--hairline);
+  border-radius:var(--r-pill);
+  background:transparent;
+  color:var(--body-mid);
+  text-align:center;
+  transition:border-color .12s, background-color .12s, color .12s;
+}
+.segmented button b{
+  font-family:var(--font-mono); font-weight:var(--w-regular);
+  font-size:var(--t-body-sm); line-height:1; letter-spacing:var(--track-mono-sm);
+}
+.segmented button i{
+  font-style:normal; font-size:10px; line-height:1.2;
+  color:var(--mute); word-break:keep-all;
+}
+.segmented button:hover:not(:disabled){ border-color:var(--pill-border); color:var(--ink) }
+.segmented button[aria-pressed="true"]{
+  background:var(--primary); border-color:var(--primary); color:var(--on-primary);
+}
+.segmented button[aria-pressed="true"] i{ color:var(--on-primary); opacity:.7 }
+.segmented button:disabled{ opacity:.3; cursor:not-allowed; border-style:dashed }
+
+/* ═══════════════════════ 사이트 헤더 ═══════════════════════ */
+
+.site-header{
+  position:sticky; top:0; z-index:50;
+  background:var(--canvas);
+  border-bottom:1px solid var(--hairline);
+}
+.site-header__bar{
+  min-height:var(--header-h);
+  display:flex; align-items:center; gap:var(--sp-xl); flex-wrap:wrap;
+  padding-block:var(--sp-md);
+}
+.brand{ display:flex; align-items:baseline; gap:var(--sp-md); flex:none }
+.brand__mark{
+  font-family:var(--font-mono); font-size:var(--t-caption-sm);
+  letter-spacing:var(--track-mono-sm); text-transform:uppercase; color:var(--mute);
+}
+.brand__name{ font-size:var(--t-body-md); letter-spacing:-.01em; color:var(--ink) }
+
+/* 내비 = 필 링크. 활성 항목만 흰색 채움으로 반전된다. */
+.site-nav{ display:flex; gap:var(--sp-sm); margin-left:auto; flex-wrap:wrap }
+.site-nav a{
+  padding:var(--sp-xs) var(--sp-md);
+  border:1px solid transparent;
+  border-radius:var(--r-pill);
+  font-size:var(--t-body-sm);
+  line-height:1.43;
+  color:var(--body-mid);
+  white-space:nowrap;
+  transition:color .15s, background-color .15s, border-color .15s;
+}
+.site-nav a:hover{ color:var(--ink); border-color:var(--pill-border) }
+.site-nav a[aria-current="page"]{ background:var(--primary); border-color:var(--primary); color:var(--on-primary) }
+
+/* ═══════════════════════ 단계 레일 ═══════════════════════ */
+
+.steps{
+  display:flex;
+  border:1px solid var(--hairline);
+  border-radius:var(--r-sm) var(--r-sm) 0 0;
+  background:var(--canvas-card);
+  overflow-x:auto;
+}
+.steps button{
+  flex:1 1 0; min-width:150px;
+  padding:var(--sp-lg);
+  text-align:left;
+  border-right:1px solid var(--hairline);
+  color:var(--body-mid);
+  position:relative;
+  transition:background-color .15s, color .15s;
+}
+.steps button:last-child{ border-right:0 }
+.steps button:hover{ background:var(--canvas-soft); color:var(--ink) }
+.steps__num{
+  display:block;
+  font-family:var(--font-mono); font-size:var(--t-caption-sm);
+  line-height:1.33; letter-spacing:var(--track-mono-sm);
+  text-transform:uppercase; color:var(--mute);
+}
+.steps__name{ display:block; margin-top:var(--sp-xs); font-size:var(--t-body-md); color:inherit }
+.steps button[aria-selected="true"]{ background:var(--canvas-soft); color:var(--ink) }
+.steps button[aria-selected="true"] .steps__num{ color:var(--ink) }
+.steps button[aria-selected="true"]::after{
+  content:""; position:absolute; left:0; right:0; bottom:0; height:1px; background:var(--primary);
+}
+.steps button.is-done .steps__num::before{ content:"✓ "; color:var(--sem-ok) }
+
+/* 레일 바로 아래 붙는 패널 */
+.step-panel{
+  background:var(--canvas-card);
+  border:1px solid var(--hairline);
+  border-top:0;
+  border-radius:0 0 var(--r-sm) var(--r-sm);
+  padding:var(--sp-xl);
+}
+
+/* ═══════════════════════ 섹션 머리 ═══════════════════════ */
+
+.section-head{ margin-bottom:var(--sp-xl) }
+.section-head .eyebrow{ display:block; margin-bottom:var(--sp-md); color:var(--mute) }
+.section-head__title{ font-size:var(--t-display-sm); line-height:1.14; letter-spacing:var(--track-display-sm) }
+.section-head__hint{ margin-top:var(--sp-md); font-size:var(--t-body-sm); line-height:1.6; color:var(--body-mid); max-width:76ch }
+
+/* ═══════════════════════ 간격 유틸 ═══════════════════════
+   토큰 간격만 노출한다. 임의값을 인라인 style 로 뿌리지 않기 위한 최소 세트. */
+
+.mt-xs { margin-top:var(--sp-xs) }
+.mt-sm { margin-top:var(--sp-sm) }
+.mt-md { margin-top:var(--sp-md) }
+.mt-lg { margin-top:var(--sp-lg) }
+.mt-xl { margin-top:var(--sp-xl) }
+.mt-2xl{ margin-top:var(--sp-2xl) }
+.mt-3xl{ margin-top:var(--sp-3xl) }
+.mb-4xl{ margin-bottom:var(--sp-4xl) }
+.pb-4xl{ padding-bottom:var(--sp-4xl) }
+
+.list{ padding-left:var(--sp-lg) }
+.list li::marker{ color:var(--canvas-mid) }
+.self-start{ align-self:flex-start }
+.w-narrow{ max-width:260px }
+.w-file{ max-width:440px }
+
+@media (max-width:640px){
+  .container{ padding-inline:var(--sp-lg) }
+  .band{ padding-block:var(--sp-2xl) }
+  .card,.step-panel{ padding:var(--sp-lg) }
+}

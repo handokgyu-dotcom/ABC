@@ -1,0 +1,66 @@
+/* ══════════════════════════════════════════════════════════════
+   base.css — 리셋 + 문서 기본값
+   토큰만 참조하고, 컴포넌트 클래스는 정의하지 않는다.
+   ══════════════════════════════════════════════════════════════ */
+
+*,*::before,*::after{ box-sizing:border-box }
+
+html{ -webkit-text-size-adjust:100% }
+
+body{
+  margin:0;
+  background:var(--canvas);
+  color:var(--ink);
+  font-family:var(--font-sans);
+  font-size:var(--t-body-md);
+  font-weight:var(--w-regular);
+  line-height:1.5;
+  -webkit-font-smoothing:antialiased;
+  -moz-osx-font-smoothing:grayscale;
+}
+
+/* 제목 기본값은 비워둔다 — 크기는 .display-* 유틸이 정한다.
+   그래야 h1~h3 를 의미에 맞게 쓰면서 시각 위계는 따로 고를 수 있다. */
+h1,h2,h3,h4{
+  margin:0;
+  font-weight:var(--w-regular);
+  font-size:inherit;
+  line-height:inherit;
+  letter-spacing:inherit;
+}
+p{ margin:0 }
+ul,ol{ margin:0; padding:0 }
+
+img,svg{ max-width:100%; display:block }
+
+a{ color:inherit; text-decoration:none }
+
+/* 폼 컨트롤이 서체를 물려받게 한다 */
+button,input,select,textarea{ font:inherit; color:inherit }
+button{ background:none; border:0; padding:0; cursor:pointer }
+
+[hidden]{ display:none !important }
+
+/* 포커스 링 — 문서에 규정이 없어 브랜드의 흰색으로 통일한다.
+   :focus-visible 만 잡아 마우스 클릭에는 링이 뜨지 않게 한다. */
+:focus-visible{
+  outline:2px solid var(--primary);
+  outline-offset:2px;
+  border-radius:var(--r-sm);
+}
+
+::selection{ background:var(--primary); color:var(--on-primary) }
+
+/* 다크 캔버스에 맞춘 스크롤바 */
+*{ scrollbar-color:var(--canvas-mid) transparent }
+*::-webkit-scrollbar{ width:10px; height:10px }
+*::-webkit-scrollbar-track{ background:transparent }
+*::-webkit-scrollbar-thumb{
+  background:var(--canvas-mid);
+  border-radius:var(--r-pill);
+  border:3px solid var(--canvas);
+}
+
+@media (prefers-reduced-motion:reduce){
+  *{ transition:none !important; animation:none !important; scroll-behavior:auto !important }
+}

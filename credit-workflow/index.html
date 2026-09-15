@@ -1,0 +1,445 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="color-scheme" content="dark">
+<title>레미콘 여신심사</title>
+
+<!-- Pretendard: Universal Sans 대체 (한글·라틴 한 패밀리, 동적 서브셋) -->
+<link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable-dynamic-subset.css">
+<!-- Geist Mono: 문서가 지정한 브랜드 동반 모노 -->
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Geist+Mono:wght@400;500&display=swap">
+
+<link rel="stylesheet" href="assets/css/tokens.css">
+<link rel="stylesheet" href="assets/css/base.css">
+<link rel="stylesheet" href="assets/css/components.css">
+<link rel="stylesheet" href="assets/css/credit.css">
+<link rel="stylesheet" href="assets/css/surety.css">
+<link rel="stylesheet" href="assets/css/print.css">
+</head>
+<body>
+
+<header class="site-header">
+  <div class="container site-header__bar">
+    <a class="brand" href="#home">
+      <span class="brand__mark">삼표산업</span>
+      <span class="brand__name">레미콘 여신심사</span>
+    </a>
+    <nav class="site-nav" aria-label="심사 구분">
+      <a href="#credit" data-route="credit">신용거래 심사</a>
+      <a href="#surety" data-route="surety">연대보증 심사</a>
+    </nav>
+  </div>
+</header>
+
+<!-- ═════════════════════════════ 시작 화면 ═════════════════════════════ -->
+<main class="page" id="page-home">
+  <div class="band container">
+    <p class="eyebrow eyebrow--mute">외상거래 여신심사</p>
+    <h1 class="display-xl mt-xl">여신심사 두 갈래를<br>한 곳에서</h1>
+    <p class="lede mt-xl">
+      외상거래 여신심사는 신용과 연대보증 두 축으로 나뉩니다.
+      아래에서 필요한 쪽을 고르거나, 위쪽 헤더로 언제든 오갈 수 있습니다.
+    </p>
+  </div>
+
+  <div class="container pb-4xl">
+    <div class="grid grid--wide">
+      <a class="card" href="#credit">
+        <span class="eyebrow eyebrow--sm eyebrow--mute">Credit</span>
+        <h2 class="display-sm mt-md">신용거래 심사</h2>
+        <p class="body-sm dim mt-md">
+          신용분석보고서(PDF) 한 건을 올리면 「재무 (신용)」 평가표 11개 항목이 자동으로 채워지고,
+          배점·합산점수·판정까지 한 번에 나옵니다.
+        </p>
+        <ul class="body-sm muted list mt-lg">
+          <li>NICE 기업분석보고서(상세) 자동 판독</li>
+          <li>11개 항목 중 10개 자동 · 현금흐름등급은 게이지 판독</li>
+          <li>추진 기준 70점 컷 판정</li>
+        </ul>
+        <span class="btn btn--sm mt-xl self-start">평가표 열기</span>
+      </a>
+
+      <a class="card" href="#surety">
+        <span class="eyebrow eyebrow--sm eyebrow--mute">Surety</span>
+        <h2 class="display-sm mt-md">연대보증 심사</h2>
+        <p class="body-sm dim mt-md">
+          등기부 담보가치 평가부터 타설계획·현장 현황까지 3단계를 한 화면에서 진행합니다.
+          레미콘 단가표와 실거래가 조회가 내장되어 계산이 실제로 동작합니다.
+        </p>
+        <ul class="body-sm muted list mt-lg">
+          <li>STEP 01 담보가치 평가 (등기부 자동 분석)</li>
+          <li>STEP 02 타설계획 · 월중여신 · 신청여신 산출</li>
+          <li>STEP 03 현장 현황 · PDF 다운로드</li>
+        </ul>
+        <span class="btn btn--sm mt-xl self-start">워크플로 열기</span>
+      </a>
+    </div>
+
+    <p class="body-sm muted mt-3xl">
+      신용거래 심사는 브라우저 안에서만 동작하며 업로드한 PDF를 어디로도 보내지 않습니다.
+      연대보증 심사의 STEP 01 담보가치 평가만 별도 백엔드(streamlit-app API)를 호출합니다.
+    </p>
+  </div>
+</main>
+
+<!-- ═════════════════════════════ 신용거래 심사 ═════════════════════════════ -->
+<main class="page" id="page-credit" hidden>
+
+  <div class="band container">
+    <p class="eyebrow eyebrow--mute">외상거래 신용거래 심사</p>
+    <h1 class="display-lg mt-xl">신용거래 심사 산출기</h1>
+    <p class="lede mt-xl">
+      신용분석보고서(PDF) 한 건을 올리면 사내 「재무 (신용)」 평가표의 11개 항목이 자동으로 채워지고,
+      배점·합산점수·판정까지 한 번에 나옵니다.
+    </p>
+    <div class="cluster mt-xl">
+      <span class="chip">기준 <b>PRD v3.2</b></span>
+      <span class="chip">평가항목 <b>11개</b></span>
+      <span class="chip">자동 판독 <b>10 / 11</b></span>
+      <span class="chip">추진 기준 <b>70점</b></span>
+    </div>
+  </div>
+
+  <div class="divider"></div>
+
+  <div class="band band--tight container">
+    <div class="dropzone" id="drop" tabindex="0" role="button" aria-label="신용분석보고서 PDF 업로드">
+      <div>
+        <div class="dropzone__title">신용분석보고서(PDF)를 여기에 놓으세요</div>
+        <div class="dropzone__hint">NICE평가정보 기업분석보고서(상세) · 클릭해서 파일을 고를 수도 있습니다</div>
+      </div>
+      <input type="file" id="pdfInput" accept="application/pdf,.pdf" multiple hidden>
+    </div>
+
+    <div class="card card--flush mt-lg" id="upstat" hidden>
+      <div class="uplog__head">
+        <span class="uplog__co" id="upCo">—</span>
+        <span class="uplog__meta" id="upMeta"></span>
+        <button type="button" class="btn btn--sm" id="upReset">지우기</button>
+      </div>
+      <div id="upLog"></div>
+    </div>
+  </div>
+
+  <div class="band container">
+    <div class="section-head">
+      <span class="eyebrow">Result</span>
+      <h2 class="section-head__title" id="modelTitle">「재무 (신용)」 평가표</h2>
+    </div>
+
+    <div class="scorer">
+      <div class="card card--flush sheet" id="sheet">
+        <div class="sheet__row sheet__row--head">
+          <span>NO</span>
+          <span>평가 항목</span>
+          <span style="text-align:center">등급 기준 · 평가 &nbsp;|&nbsp; A 100% · B 80% · C 60% · D 40% · E 20%</span>
+          <span style="text-align:right">배점</span>
+        </div>
+      </div>
+
+      <aside class="card score-panel">
+        <span class="badge" id="demoFlag" hidden>산출 결과</span>
+        <span class="eyebrow eyebrow--sm eyebrow--mute mt-sm" style="display:block">합산점수</span>
+        <div class="score-panel__score"><span id="scoreVal">0.0</span><small>/ 100</small></div>
+
+        <div class="meter">
+          <i class="meter__fill" id="bar" style="width:0%"></i>
+          <div class="meter__mark" style="left:70%"></div>
+        </div>
+        <div class="meter__scale"><span>0</span><span>70 컷</span><span>100</span></div>
+
+        <div class="verdict" id="verdict">평가 미입력</div>
+
+        <p class="field__hint mt-lg">
+          배점 = 가중치 × 등급률<br>A 100% · B 80% · C 60% · D 40% · E 20%
+        </p>
+        <p class="field__hint mt-md">
+          평가표 양식은 항상 비어 있습니다. 보고서를 올리면 그 사본에 등급이 자동으로 채워집니다.
+        </p>
+
+        <button type="button" class="btn btn--sm btn--block mt-lg" id="btnClear">비우기</button>
+      </aside>
+    </div>
+
+    <p class="body-sm muted mt-3xl">
+      이 페이지의 평가표는 사내 「재무 (신용)」 시트의 항목·가중치·등급 기준을 그대로 옮긴 것입니다.
+      <span id="footNote">평가표는 비어 있는 상태로 보관합니다. 위쪽에 신용분석보고서를 올리면 그 보고서 기준으로 채워집니다.</span>
+      판정 규칙과 등급 매핑은 PRD 문서를 따릅니다.
+      NO.4 현금흐름등급은 보고서에 이미지로만 있는 경우 판독되지 않아 합산점수가 보류됩니다.
+    </p>
+  </div>
+</main>
+
+<!-- ═════════════════════════════ 연대보증 심사 ═════════════════════════════ -->
+<main class="page" id="page-surety" hidden>
+  <div class="container">
+
+    <div class="band">
+      <p class="eyebrow eyebrow--mute">삼표산업 · 외상거래 여신심사</p>
+      <h1 class="display-lg mt-xl">레미콘 여신심사 워크플로</h1>
+      <p class="lede mt-xl">
+        담보가치 평가 → 타설계획 → 현장 현황까지 한 화면에서 진행합니다.
+        레미콘 단가표 · 국토부/호갱노노 실거래가 조회가 내장되어 있어 계산은 실제로 동작합니다.
+      </p>
+    </div>
+
+    <div class="steps" role="tablist" aria-label="심사 단계">
+      <button type="button" role="tab" id="t1" aria-selected="true" data-go="p1">
+        <span class="steps__num">Step 01</span><span class="steps__name">담보가치 평가</span>
+      </button>
+      <button type="button" role="tab" id="t2" aria-selected="false" data-go="p2">
+        <span class="steps__num">Step 02</span><span class="steps__name">타설계획</span>
+      </button>
+      <button type="button" role="tab" id="t3" aria-selected="false" data-go="p3">
+        <span class="steps__num">Step 03</span><span class="steps__name">현장 현황</span>
+      </button>
+    </div>
+
+    <div id="stepPanels">
+
+      <!-- ────────── STEP 01 ────────── -->
+      <section class="step-panel" id="p1">
+        <div class="section-head">
+          <span class="eyebrow eyebrow--sm">Step 01</span>
+          <h2 class="section-head__title">담보가치 평가 (등기부 자동 분석)</h2>
+          <p class="section-head__hint">등기부등본 PDF를 업로드하면 별도 백엔드(streamlit-app API)가 물건지를 자동 감지하고,
+            선순위(근저당권) 합계 · 최근 실거래가 · 담보가치를 계산해 돌려줍니다. 이 화면은 결과를 표시만 하며,
+            분석 로직은 <span class="mono">streamlit-app/</span> 폴더의 API 서버에서 수행됩니다.</p>
+        </div>
+
+        <div class="filefield w-file">
+          <span class="field__label">부동산 등기부등본 (PDF)</span>
+          <input type="file" id="f_collateral_pdf" accept=".pdf">
+          <span class="filefield__got" id="f_collateral_pdf_got"></span>
+        </div>
+
+        <div class="card card--soft mt-lg">
+          <div class="card__head">
+            <span class="eyebrow eyebrow--sm">담보가치 자동 평가</span>
+            <span class="hint">등기부 업로드 후 실행 · 결과는 아래 표에 표시</span>
+            <span class="status" id="st_collateral"></span>
+          </div>
+          <div class="grid">
+            <label class="field">
+              <span class="field__label">기본 낙찰가율 (%) <em>· 기준표에 없는 지역일 때 사용</em></span>
+              <input type="number" id="i_collateral_rate" class="input input--num" min="1" max="100" value="80">
+            </label>
+          </div>
+          <div class="cluster mt-lg">
+            <button type="button" class="btn btn--primary" id="btn_collateral_eval">담보가치 평가 실행</button>
+            <button type="button" class="btn" id="btn_collateral_report" disabled>PDF 리포트 다운로드</button>
+          </div>
+        </div>
+
+        <div class="table-scroll mt-lg">
+          <table class="table" id="collateral_tbl">
+            <thead><tr>
+              <th>물건지</th><th class="num">선순위</th><th class="num">실거래가</th>
+              <th class="num">낙찰가율</th><th class="num">담보가치</th>
+            </tr></thead>
+            <tbody></tbody>
+          </table>
+        </div>
+
+        <div class="stat-grid mt-lg">
+          <div class="stat stat--hero">
+            <div class="stat__label">전체 물건지 담보가치 합계</div>
+            <div class="stat__value" id="o_collateral_total">—</div>
+          </div>
+        </div>
+        <div id="collateral_flag"></div>
+      </section>
+
+      <!-- ────────── STEP 02 ────────── -->
+      <section class="step-panel" id="p2" hidden>
+        <div class="section-head">
+          <span class="eyebrow eyebrow--sm">Step 02</span>
+          <h2 class="section-head__title">타설계획</h2>
+          <p class="section-head__hint">현장별 월간 타설량을 입력하면 매출채권 · 월중여신을 자동 계산합니다.
+            월별 칸은 <b>타설량(㎥)</b>으로 입력하십시오. 금액 = 타설량 × 적용단가.</p>
+        </div>
+
+        <div class="card card--soft">
+          <div class="card__head">
+            <span class="eyebrow eyebrow--sm">기본 조건</span>
+            <span class="hint">타설기간 · 결제조건 · 단가</span>
+          </div>
+          <div class="grid">
+            <label class="field">
+              <span class="field__label">타설기간 시작</span>
+              <input type="month" id="i_ts_start" class="input">
+            </label>
+            <label class="field">
+              <span class="field__label">타설기간 종료 <em>· 미입력시 시작월부터 9개월</em></span>
+              <input type="month" id="i_ts_end" class="input">
+            </label>
+            <label class="field">
+              <span class="field__label">대금결제조건 <em>· 월말청구 · 현금은 고정, 일수만 입력</em></span>
+              <span class="cluster">
+                <span class="mono muted">월말청구</span>
+                <input type="number" id="i_ts_days" class="input input--num input--tight" min="0" style="width:80px">
+                <span class="mono muted">일 현금</span>
+              </span>
+            </label>
+          </div>
+          <p class="field__hint mono mt-md" id="ts_paycond_display"></p>
+
+          <div class="grid mt-lg">
+            <label class="field">
+              <span class="field__label">호칭강도 <em>· MPa</em></span>
+              <select id="i_ts_strength" class="select"></select>
+            </label>
+            <label class="field">
+              <span class="field__label">슬럼프 <em>· mm</em></span>
+              <select id="i_ts_slump" class="select"></select>
+            </label>
+            <label class="field">
+              <span class="field__label">기준단가 <em>· 원/㎥ · 100% · 단가표 자동조회</em></span>
+              <input type="text" id="o_ts_baseprice" class="input input--num" readonly>
+            </label>
+            <label class="field">
+              <span class="field__label">단가할인율 <em>· %</em></span>
+              <input type="number" id="i_ts_discount" class="input input--num" min="0" max="100" step="0.1" value="100">
+            </label>
+            <label class="field">
+              <span class="field__label">적용단가 <em>· 원/㎥ · 자동계산</em></span>
+              <input type="text" id="o_ts_price" class="input input--num" readonly>
+            </label>
+          </div>
+          <p class="field__hint mt-md">레미콘 단가표 기준 · 굵은 골재 최대치수 25mm · 지역: 서울·경기·인천 · 적용일자: 2026.04.01 · 금액 VAT별도(원/㎥)</p>
+        </div>
+
+        <div class="table-scroll mt-lg">
+          <table class="table table--mini table--top" id="ts_tbl">
+            <thead><tr id="ts_thead_row">
+              <th>현장명</th><th>비고</th><th class="num">합계(㎥)</th><th></th>
+            </tr></thead>
+            <tbody></tbody>
+          </table>
+        </div>
+        <div class="cluster mt-lg">
+          <button type="button" class="btn btn--sm" id="btn_add_ts">+ 현장 행 추가</button>
+        </div>
+
+        <div id="ts_flag"></div>
+
+        <label class="field mt-lg w-narrow">
+          <span class="field__label">절상 단위</span>
+          <select id="i_ts_roundunit" class="select">
+            <option value="10000000">천만원</option>
+            <option value="50000000" selected>5천만원</option>
+            <option value="100000000">1억원</option>
+          </select>
+        </label>
+
+        <div class="stat-grid mt-md">
+          <div class="stat stat--hero">
+            <div class="stat__label">신청여신 · 최고 월중여신 + 선택 단위, 천만원 단위 절사</div>
+            <div class="stat__value" id="o_ts_apply">—</div>
+          </div>
+        </div>
+
+        <div class="cluster mt-lg">
+          <button type="button" class="btn btn--primary" id="btn_ts_pdf">PDF 다운로드</button>
+          <button type="button" class="btn" id="btn_reset_ts">입력 초기화</button>
+        </div>
+      </section>
+
+      <!-- ────────── STEP 03 ────────── -->
+      <section class="step-panel" id="p3" hidden>
+        <div class="section-head">
+          <span class="eyebrow eyebrow--sm">Step 03</span>
+          <h2 class="section-head__title">현장 현황</h2>
+          <p class="section-head__hint">현재 당사납품현장의 상황을 한 장으로 파악할 수 있게 최대한 상세히 작성하십시오.</p>
+        </div>
+
+        <div class="card card--soft">
+          <div class="card__head"><span class="eyebrow eyebrow--sm">현장 개요</span></div>
+          <div class="grid">
+            <label class="field"><span class="field__label">현장명(공사유형)</span><input type="text" id="i_sv_name" class="input"></label>
+            <label class="field"><span class="field__label">현장위치(주소)</span><input type="text" id="i_sv_addr" class="input"></label>
+            <label class="field"><span class="field__label">공사기간 시작</span><input type="date" id="i_sv_from" class="input"></label>
+            <label class="field"><span class="field__label">공사기간 종료</span><input type="date" id="i_sv_to" class="input"></label>
+            <label class="field"><span class="field__label">현장 목적</span><input type="text" id="i_sv_purpose" class="input"></label>
+            <label class="field"><span class="field__label">직접/도급</span>
+              <select id="i_sv_direct" class="select"><option value=""></option><option>직접</option><option>도급</option></select></label>
+          </div>
+        </div>
+
+        <div class="card card--soft mt-lg">
+          <div class="card__head"><span class="eyebrow eyebrow--sm">발주 · 물량</span></div>
+          <div class="grid">
+            <label class="field"><span class="field__label">발주처</span><input type="text" id="i_sv_orderer" class="input"></label>
+            <label class="field"><span class="field__label">시공사</span><input type="text" id="i_sv_contractor" class="input"></label>
+            <label class="field"><span class="field__label">신탁사</span><input type="text" id="i_sv_trust" class="input"></label>
+            <label class="field"><span class="field__label">기성지급조건</span><input type="text" id="i_sv_paycond" class="input"></label>
+            <label class="field"><span class="field__label">총물량 <em>· ㎥</em></span><input type="text" id="i_sv_totalvol" class="input input--num"></label>
+            <label class="field"><span class="field__label">당사물량 <em>· ㎥</em></span><input type="text" id="i_sv_ourvol" class="input input--num"></label>
+            <label class="field"><span class="field__label">공동타설사</span><input type="text" id="i_sv_copour" class="input"></label>
+          </div>
+        </div>
+
+        <div class="card card--soft mt-lg">
+          <div class="card__head"><span class="eyebrow eyebrow--sm">분양 · 인프라</span></div>
+          <div class="grid">
+            <label class="field"><span class="field__label">총세대수</span><input type="text" id="i_sv_households" class="input input--num"></label>
+            <label class="field"><span class="field__label">분양세대수</span><input type="text" id="i_sv_soldhh" class="input input--num"></label>
+            <label class="field"><span class="field__label">분양률</span><input type="text" id="i_sv_soldrate" class="input input--num"></label>
+            <label class="field"><span class="field__label">분양가 <em>· 평</em></span><input type="text" id="i_sv_price" class="input input--num"></label>
+            <label class="field"><span class="field__label">주변시세 <em>· 평</em></span><input type="text" id="i_sv_marketprice" class="input input--num"></label>
+          </div>
+          <div class="card__head mt-xl"><span class="eyebrow eyebrow--sm">인프라</span></div>
+          <div class="grid">
+            <label class="field"><span class="field__label">지하철</span><input type="text" id="i_sv_subway" class="input"></label>
+            <label class="field"><span class="field__label">학교</span><input type="text" id="i_sv_school" class="input"></label>
+            <label class="field"><span class="field__label">관공서</span><input type="text" id="i_sv_office" class="input"></label>
+            <label class="field"><span class="field__label">마트</span><input type="text" id="i_sv_mart" class="input"></label>
+            <label class="field"><span class="field__label">병원</span><input type="text" id="i_sv_hospital" class="input"></label>
+            <label class="field"><span class="field__label">IC</span><input type="text" id="i_sv_ic" class="input"></label>
+          </div>
+        </div>
+
+        <div class="card card--soft mt-lg">
+          <div class="card__head"><span class="eyebrow eyebrow--sm">주변 여건 · 기타</span></div>
+          <div class="grid">
+            <label class="field"><span class="field__label">주변분양현황</span><input type="text" id="i_sv_nearbysale" class="input"></label>
+            <label class="field"><span class="field__label">주변환경</span><input type="text" id="i_sv_environment" class="input"></label>
+            <label class="field"><span class="field__label">유동인구비율</span><input type="text" id="i_sv_footfall" class="input"></label>
+          </div>
+          <label class="field mt-lg">
+            <span class="field__label">기타 의견</span>
+            <textarea id="i_sv_etc" class="textarea" rows="3"></textarea>
+          </label>
+        </div>
+
+        <div class="cluster mt-lg">
+          <button type="button" class="btn btn--primary" id="btn_sv_pdf">PDF 다운로드</button>
+          <button type="button" class="btn" id="btn_reset_sv">입력 초기화</button>
+        </div>
+      </section>
+    </div>
+
+    <p class="body-sm muted mt-xl mb-4xl">
+      레미콘 단가표 2026.04.01 적용분 ·
+      STEP 01 담보가치 평가만 별도 백엔드(streamlit-app API)를 호출하며, 그 외 화면은 외부 API를 직접 호출하지 않습니다.
+    </p>
+  </div>
+</main>
+
+<!-- 인쇄 전용 출력 영역 (화면에서는 print.css 가 숨긴다) -->
+<div id="ts_print_area"></div>
+
+<!-- pdf.js(1.5MB)는 여기서 받지 않는다. credit.js 의 ensurePdfjs() 가
+     신용 페이지에 처음 들어올 때 assets/vendor/ 에서 지연 로드한다. -->
+<script src="assets/js/utils.js" defer></script>
+<script src="assets/js/credit.js" defer></script>
+<script src="assets/js/surety.js" defer></script>
+<script src="assets/js/shell.js" defer></script>
+
+</body>
+</html>

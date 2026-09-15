@@ -1,0 +1,112 @@
+/* ══════════════════════════════════════════════════════════════
+   tokens.css — 디자인 토큰 (단일 출처)
+   출처: DESIGN-x.ai.md (xAI design language)
+
+   이 파일에는 값만 있다. 규칙은 components.css 가 갖는다.
+   색·타이포·간격을 바꿀 일이 생기면 여기만 고치면 된다.
+
+   xAI 는 다크 캔버스 전용이다. 라이트 모드 대응물을 만들지 않는다.
+   (문서: "Don't introduce a light-mode counterpart.")
+   인쇄는 예외이며 print.css 가 흰 종이 기준으로 따로 덮어쓴다.
+   ══════════════════════════════════════════════════════════════ */
+
+:root{
+  /* 폼 컨트롤(select·date·file)까지 다크로 렌더되게 한다 */
+  color-scheme: dark;
+
+  /* ─────────────────────────── 색 ─────────────────────────── */
+  --primary:        #ffffff;
+  --on-primary:     #0a0a0a;
+
+  --ink:            #ffffff;   /* 기본 텍스트 */
+  --ink-hover:      #fafaf7;
+  --body:           #dadbdf;   /* 보조 본문 */
+  --body-mid:       #7d8187;   /* 중간 강조 */
+  --mute:           #7d8187;   /* 캡션·미세활자 */
+
+  --canvas:         #0a0a0a;   /* 유일한 페이지 바탕 */
+  --canvas-soft:    #1a1c20;   /* 호버·툴팁·입력 바탕 */
+  --canvas-card:    #191919;   /* 카드 바탕 */
+  --canvas-mid:     #363a3f;   /* 중첩 표면 */
+  --hairline:       #212327;   /* 1px 구분선 — 이 시스템의 유일한 입체 표현 */
+
+  --accent-sunset:      #ff7a17;
+  --accent-sunset-soft: #ffc285;
+  --accent-dusk:        #7c3aed;
+  --accent-twilight:    #c4b5fd;
+  --accent-breeze:      #a0c3ec;
+  --accent-midnight:    #0d1726;
+
+  /* 아웃라인 필의 테두리. 문서가 "solid white 가 아니라 반투명 흰색"이라고
+     못박은 런타임 값이다. hairline 보다 이쪽이 버튼의 정답. */
+  --pill-border:      rgba(255,255,255,.25);
+  --pill-border-hover:rgba(255,255,255,.45);
+
+  /* ───────────────────── 시맨틱 (확장 3개) ─────────────────────
+     xAI 원본에는 시맨틱 팔레트가 없다("The brand doesn't surface a
+     separate semantic palette"). 그러나 이 도구는 「추진 / 보류 / 불가」
+     판정이 핵심이라 최소 3개만 확장한다.
+     warn 은 새 색을 만들지 않고 브랜드 토큰 accent-sunset 을 그대로 쓴다. */
+  --sem-ok:        #4ade80;
+  --sem-warn:      var(--accent-sunset);
+  --sem-crit:      #f87171;
+  --sem-ok-wash:   rgba(74,222,128,.10);
+  --sem-warn-wash: rgba(255,122,23,.10);
+  --sem-crit-wash: rgba(248,113,113,.10);
+  --sem-ok-line:   rgba(74,222,128,.35);
+  --sem-warn-line: rgba(255,122,23,.35);
+  --sem-crit-line: rgba(248,113,113,.35);
+
+  /* ────────────────────────── 서체 ──────────────────────────
+     Universal Sans 는 유료라 대체한다. Pretendard 는 Inter 파생이라
+     문서가 요구하는 기하학적 인상과 음수 자간이 한글에도 먹힌다.
+     Geist Mono 는 문서가 지정한 브랜드 동반 서체. */
+  --font-sans: Pretendard, Inter, system-ui, -apple-system, "Segoe UI", sans-serif;
+  --font-mono: "Geist Mono", "IBM Plex Mono", ui-monospace, SFMono-Regular, Menlo, Monaco, monospace;
+
+  /* 크기 — 디스플레이는 모바일에서 줄어든다 (문서: 96 → 48px) */
+  --t-display-xl: clamp(48px, 7.2vw, 96px);
+  --t-display-lg: clamp(40px, 5.6vw, 72px);
+  --t-display-md: clamp(30px, 3.8vw, 48px);
+  --t-display-sm: clamp(24px, 2.6vw, 32px);
+  --t-display-xs: 20px;
+  --t-body-lg:    18px;
+  --t-body-md:    16px;
+  --t-body-sm:    14px;
+  --t-caption:    14px;
+  --t-caption-sm: 12px;
+
+  /* 자간 — 문서의 px 값을 em 으로 환산해 clamp 와 같이 움직이게 한다.
+     96px/-2.4px, 72px/-1.8px, 48px/-1.2px 는 전부 -0.025em 이다. */
+  --track-display:  -.025em;
+  --track-display-sm: -.019em;
+  --track-mono:     .1em;     /* 14px 기준 1.4px */
+  --track-mono-sm:  .1em;     /* 12px 기준 1.2px */
+
+  /* 무게 — 문서: "Weight 400 for everything. The brand never bolds." */
+  --w-regular: 400;
+  --w-medium:  500;   /* 표 헤더/배지 가독성 확보용, 디스플레이에는 쓰지 않는다 */
+
+  /* ────────────────────────── 간격 (4px 기준) ────────────────────────── */
+  --sp-xxs:  2px;
+  --sp-xs:   4px;
+  --sp-sm:   8px;
+  --sp-md:  12px;
+  --sp-lg:  16px;
+  --sp-xl:  24px;
+  --sp-2xl: 32px;
+  --sp-3xl: 48px;
+  --sp-4xl: 64px;
+
+  /* ────────────────────────── 모서리 ────────────────────────── */
+  --r-none: 0px;
+  --r-sm:   8px;    /* 카드 */
+  --r-pill: 9999px; /* 모든 인터랙티브 요소 */
+
+  /* ────────────────────────── 레이아웃 ────────────────────────── */
+  --container: 1200px;
+  --header-h:  56px;
+
+  /* 문서: "The brand uses no shadows. Hairline borders carry all
+     elevation cues." 그림자 토큰을 두지 않는 것이 의도된 제약이다. */
+}
